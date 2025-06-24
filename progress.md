@@ -80,12 +80,22 @@
   - ✅ Hiệu ứng respawn (fade in/out cho sprite và tên)
   - ✅ Hiệu ứng di chuyển mượt mà hơn (trail effect cho đạn)
 
-- [ ] **Gameplay nâng cao**
-  - [ ] Mỗi nhân vật có máu (HP), mặc định 3 điểm
-  - [ ] Trúng đạn 3 lần sẽ chết (bị loại khỏi vòng chơi hoặc respawn lại từ đầu)
-  - [ ] Hiển thị thanh máu trên đầu nhân vật
-  - [ ] Bot (fake player) di chuyển ngẫu nhiên
-  - [ ] Bot có thể bắn đạn về phía player hoặc ngẫu nhiên
+- [x] **Gameplay nâng cao**
+  - ✅ Mỗi nhân vật có máu (HP), mặc định 3 điểm
+  - ✅ Trúng đạn 3 lần sẽ chết (respawn lại từ đầu)
+  - ✅ Hiển thị thanh máu trên đầu nhân vật
+  - ✅ Bot (fake player) di chuyển ngẫu nhiên
+  - ✅ Bot có thể bắn đạn về phía player
+  - ✅ Bot và player đều có điểm, cộng điểm khi bắn chết đối thủ
+
+- [x] **Leaderboard**
+  - ✅ Hiển thị realtime ở góc phải trên, sắp xếp theo điểm
+  - ✅ Hiển thị cả bot và player chính
+
+- [x] **Gun & Shooting Polish**
+  - ✅ Mỗi nhân vật có mũi súng (hình chữ nhật) hướng theo chuột hoặc mục tiêu
+  - ✅ Hiệu ứng flash khi bắn
+  - ✅ Sửa bug mất mũi súng sau khi respawn
 
 - [ ] **Refactor & Code Structure**
   - [ ] Tách logic game khỏi UI (GameScene, Player, Bullet, Bot...)
@@ -146,3 +156,22 @@
 - **Ưu tiên:** Sửa lỗi Phaser.Class → Bắn đạn → Va chạm → Respawn
 - **Server:** Để sau khi client gameplay hoàn thiện
 - **Focus:** Tạo game loop hoàn chỉnh trước khi làm multiplayer 
+
+## 💡 Ý tưởng & Tính năng mở rộng (TODO)
+
+- **Địa hình**
+  - [ ] Thêm vật cản (obstacle) trên bản đồ
+  - [ ] Vật cản không thể di chuyển qua, đạn cũng không bắn xuyên qua
+
+- **Tuyệt chiêu (Ultimate Skill)**
+  - [ ] Thêm thanh năng lượng (energy bar) cho mỗi nhân vật
+  - [ ] Thanh năng lượng tối đa 5 điểm, tiêu diệt 1 địch được 1 điểm
+  - [ ] Đầy năng lượng sẽ kích hoạt tuyệt chiêu: bắn liên tiếp 10 viên đạn
+  - [ ] Khi đầy năng lượng, nhân vật có hiệu ứng hiển thị nổi bật
+  - [ ] Thêm hiệu ứng đạn đặc biệt cho chiêu tuyệt chiêu
+  - [ ] Chết sẽ bị reset năng lượng
+
+- **Hạt năng lượng (Energy Orb)**
+  - [ ] Thêm hạt năng lượng mọc ngẫu nhiên trên bản đồ
+  - [ ] Mỗi hạt nhặt được tăng 1 điểm năng lượng
+  - [ ] Cứ 5s sẽ mọc 1 hạt mới 

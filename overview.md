@@ -67,30 +67,6 @@ client/
 - **Docker (optional)** – Container hóa backend nếu muốn scale sau này
 ---
 
-## 🔥 Roadmap
-
-### Phase 1: Prototype core loop (client-side)
-- [x] React + Vite + Tailwind scaffold
-- [x] Tích hợp Phaser vào React (GameCanvas)
-- [x] Player di chuyển bằng WASD
-- [x] Render nhiều player
-
-### Phase 2: WebSocket + Sync
-- [ ] Gửi + nhận vị trí giữa các client
-- [ ] Quản lý danh sách player (id, name, x, y)
-- [ ] Sync đạn & collision
-
-### Phase 3: Leaderboard + API
-- [ ] Server tính điểm
-- [ ] REST API: `/api/leaderboard`
-- [ ] React UI hiển thị top điểm
-
-### Phase 4: Polish
-- [ ] Respawn logic
-- [ ] Hiệu ứng đơn giản: đạn nổ, dot chết
-- [ ] UX đẹp: màn hình chờ, nhập tên, hiển thị ping
-
----
 
 ## 🧠 Ghi chú kỹ thuật
 
