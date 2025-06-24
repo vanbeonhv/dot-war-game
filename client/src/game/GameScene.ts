@@ -87,7 +87,7 @@ export default class GameScene extends Phaser.Scene {
     this.dKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.D) as Phaser.Input.Keyboard.Key;
     this.pauseKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC) as Phaser.Input.Keyboard.Key;
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      if (!this.isPaused) {
+      if (!this.isPaused && this.respawnTimers[0] <= 0) {
         this.shootBullet(pointer.x, pointer.y);
       }
     });
@@ -146,11 +146,13 @@ export default class GameScene extends Phaser.Scene {
   respawnPlayer(playerIndex: number) {
     const player = this.players[playerIndex];
     const newPos = getRandomPos(800, 600);
+    player.data.x = newPos.x;
+    player.data.y = newPos.y;
     player.setPosition(newPos.x, newPos.y);
     player.data.hp = 3;
     player.setAlpha(0);
     this.tweens.add({
-      targets: [player.sprite, player.nameText, player.healthBar],
+      targets: [player.sprite, player.gun, player.nameText, player.healthBar],
       alpha: 1,
       duration: 500,
       ease: 'Power2'
@@ -206,20 +208,22 @@ export default class GameScene extends Phaser.Scene {
       if (this.respawnTimers[i] > 0) continue;
       bot.updateGunDirection(mainPlayer.data.x, mainPlayer.data.y);
     }
-    let dx = 0, dy = 0;
-    if (this.cursors && this.aKey && this.wKey && this.sKey && this.dKey) {
-      if (this.cursors.left.isDown || this.aKey.isDown) dx -= 1;
-      if (this.cursors.right.isDown || this.dKey.isDown) dx += 1;
-      if (this.cursors.up.isDown || this.wKey.isDown) dy -= 1;
-      if (this.cursors.down.isDown || this.sKey.isDown) dy += 1;
-    }
-    if (dx !== 0 || dy !== 0) {
-      const len = Math.sqrt(dx * dx + dy * dy);
-      dx /= len; dy /= len;
-      mainPlayer.setPosition(
-        Math.max(PLAYER_RADIUS, Math.min(800 - PLAYER_RADIUS, mainPlayer.data.x + dx * PLAYER_SPEED * (delta / 1000))),
-        Math.max(PLAYER_RADIUS, Math.min(600 - PLAYER_RADIUS, mainPlayer.data.y + dy * PLAYER_SPEED * (delta / 1000)))
-      );
+    // Player chính chỉ di chuyển nếu không respawn
+    if (this.respawnTimers[0] <= 0) {
+      let dx = 0, dy = 0;
+      if (this.cursors && this.aKey && this.wKey && this.sKey && this.dKey) {
+        if (this.cursors.left.isDown || this.aKey.isDown) dx -= 1;
+        if (this.cursors.right.isDown || this.dKey.isDown) dx += 1;
+        if (this.cursors.up.isDown || this.wKey.isDown) dy -= 1;
+        if (this.cursors.down.isDown || this.sKey.isDown) dy += 1;
+      }
+      if (dx !== 0 || dy !== 0) {
+        const len = Math.sqrt(dx * dx + dy * dy);
+        dx /= len; dy /= len;
+        const newX = Math.max(PLAYER_RADIUS, Math.min(800 - PLAYER_RADIUS, this.players[0].data.x + dx * PLAYER_SPEED * (delta / 1000)));
+        const newY = Math.max(PLAYER_RADIUS, Math.min(600 - PLAYER_RADIUS, this.players[0].data.y + dy * PLAYER_SPEED * (delta / 1000)));
+        this.players[0].setPosition(newX, newY);
+      }
     }
     // Cập nhật đạn và kiểm tra va chạm
     for (let i = this.bullets.length - 1; i >= 0; i--) {
