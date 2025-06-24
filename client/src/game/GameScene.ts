@@ -18,6 +18,16 @@ function getRandomPos(width: number, height: number) {
   };
 }
 
+function getSafeRandomPos(scene: GameScene, radius: number) {
+  let pos;
+  let tries = 0;
+  do {
+    pos = getRandomPos(800, 600);
+    tries++;
+  } while (scene.isCollidingObstacle(pos.x, pos.y, radius) && tries < 50);
+  return pos;
+}
+
 export default class GameScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wKey!: Phaser.Input.Keyboard.Key;
@@ -39,6 +49,7 @@ export default class GameScene extends Phaser.Scene {
   private botMoveTimers: number[] = [];
   private botShootTimers: number[] = [];
   private leaderboardText!: Phaser.GameObjects.Text;
+  private obstacles: Phaser.GameObjects.Rectangle[] = [];
 
   constructor() {
     super({ key: "GameScene" });
@@ -54,7 +65,7 @@ export default class GameScene extends Phaser.Scene {
     this.players = [
       new Player(this, {
         id: "me",
-        ...getRandomPos(width, height),
+        ...getSafeRandomPos(this, PLAYER_RADIUS),
         color: PLAYER_COLORS[0],
         isMain: true,
         hp: 3,
@@ -62,7 +73,7 @@ export default class GameScene extends Phaser.Scene {
       }),
       ...Array.from({ length: NUM_FAKE_PLAYERS }).map((_, i) => new Player(this, {
         id: `fake_${i}`,
-        ...getRandomPos(width, height),
+        ...getSafeRandomPos(this, PLAYER_RADIUS),
         color: PLAYER_COLORS[(i + 1) % PLAYER_COLORS.length],
         isMain: false,
         hp: 3,
@@ -98,6 +109,18 @@ export default class GameScene extends Phaser.Scene {
       align: 'right',
     });
     this.leaderboardText.setDepth(100);
+    // Sinh ngẫu nhiên vật cản
+    this.obstacles = [];
+    const numObstacles = 5;
+    for (let i = 0; i < numObstacles; i++) {
+      const w = 60 + Math.random() * 60;
+      const h = 40 + Math.random() * 40;
+      const x = 100 + Math.random() * (800 - 200);
+      const y = 100 + Math.random() * (600 - 200);
+      const rect = this.add.rectangle(x, y, w, h, 0x444444, 1).setStrokeStyle(2, 0xffffff, 0.7);
+      rect.setDepth(10);
+      this.obstacles.push(rect);
+    }
   }
 
   createPauseMenu() {
@@ -145,7 +168,7 @@ export default class GameScene extends Phaser.Scene {
 
   respawnPlayer(playerIndex: number) {
     const player = this.players[playerIndex];
-    const newPos = getRandomPos(800, 600);
+    const newPos = getSafeRandomPos(this, PLAYER_RADIUS);
     player.data.x = newPos.x;
     player.data.y = newPos.y;
     player.setPosition(newPos.x, newPos.y);
@@ -189,6 +212,26 @@ export default class GameScene extends Phaser.Scene {
     this.leaderboardText.setText(['Leaderboard', ...lines].join('\n'));
   }
 
+  // Helper: kiểm tra va chạm player với obstacle
+  isCollidingObstacle(x: number, y: number, radius: number) {
+    for (const obs of this.obstacles) {
+      const rx = obs.x;
+      const ry = obs.y;
+      const rw = obs.width!;
+      const rh = obs.height!;
+      // Kiểm tra va chạm hình tròn (player) với hình chữ nhật (obstacle)
+      const dx = Math.abs(x - rx);
+      const dy = Math.abs(y - ry);
+      if (dx > rw / 2 + radius) continue;
+      if (dy > rh / 2 + radius) continue;
+      if (dx <= rw / 2) return true;
+      if (dy <= rh / 2) return true;
+      const cornerDist = (dx - rw / 2) ** 2 + (dy - rh / 2) ** 2;
+      if (cornerDist <= radius * radius) return true;
+    }
+    return false;
+  }
+
   update(time: number, delta: number) {
     if (this.pauseKey && this.pauseKey.isDown && !this.wasPauseKeyPressed) {
       this.togglePause();
@@ -222,7 +265,10 @@ export default class GameScene extends Phaser.Scene {
         dx /= len; dy /= len;
         const newX = Math.max(PLAYER_RADIUS, Math.min(800 - PLAYER_RADIUS, this.players[0].data.x + dx * PLAYER_SPEED * (delta / 1000)));
         const newY = Math.max(PLAYER_RADIUS, Math.min(600 - PLAYER_RADIUS, this.players[0].data.y + dy * PLAYER_SPEED * (delta / 1000)));
-        this.players[0].setPosition(newX, newY);
+        // Chỉ di chuyển nếu không va chạm obstacle
+        if (!this.isCollidingObstacle(newX, newY, PLAYER_RADIUS)) {
+          this.players[0].setPosition(newX, newY);
+        }
       }
     }
     // Cập nhật đạn và kiểm tra va chạm
@@ -260,6 +306,12 @@ export default class GameScene extends Phaser.Scene {
           hitPlayer = true;
           break;
         }
+      }
+      // Nếu đạn va chạm obstacle thì xóa đạn
+      if (this.isCollidingObstacle(bullet.data.x, bullet.data.y, BULLET_RADIUS)) {
+        bullet.destroy();
+        this.bullets.splice(i, 1);
+        continue;
       }
       bullet.data.life -= delta;
       if (hitPlayer || bullet.data.life <= 0 || 
@@ -299,7 +351,9 @@ export default class GameScene extends Phaser.Scene {
         const speed = PLAYER_SPEED * 0.6;
         const newX = Math.max(PLAYER_RADIUS, Math.min(800 - PLAYER_RADIUS, bot.data.x + bot.data._moveDir.x * speed * (delta / 1000)));
         const newY = Math.max(PLAYER_RADIUS, Math.min(600 - PLAYER_RADIUS, bot.data.y + bot.data._moveDir.y * speed * (delta / 1000)));
-        bot.setPosition(newX, newY);
+        if (!this.isCollidingObstacle(newX, newY, PLAYER_RADIUS)) {
+          bot.setPosition(newX, newY);
+        }
       }
       // Bắn về phía player chính
       this.botShootTimers[i] -= delta;

@@ -87,6 +87,8 @@
   - ✅ Bot (fake player) di chuyển ngẫu nhiên
   - ✅ Bot có thể bắn đạn về phía player
   - ✅ Bot và player đều có điểm, cộng điểm khi bắn chết đối thủ
+  - ✅ Vật cản (obstacle) random trên bản đồ, không thể đi/bắn xuyên qua
+  - ✅ Khi spawn/respawn, vị trí luôn hợp lệ, không bị kẹt trên obstacle
 
 - [x] **Leaderboard**
   - ✅ Hiển thị realtime ở góc phải trên, sắp xếp theo điểm
@@ -160,8 +162,8 @@
 ## 💡 Ý tưởng & Tính năng mở rộng (TODO)
 
 - **Địa hình**
-  - [ ] Thêm vật cản (obstacle) trên bản đồ
-  - [ ] Vật cản không thể di chuyển qua, đạn cũng không bắn xuyên qua
+  - [x] Thêm vật cản (obstacle) trên bản đồ
+  - [x] Vật cản không thể di chuyển qua, đạn cũng không bắn xuyên qua
 
 - **Tuyệt chiêu (Ultimate Skill)**
   - [ ] Thêm thanh năng lượng (energy bar) cho mỗi nhân vật
@@ -175,3 +177,50 @@
   - [ ] Thêm hạt năng lượng mọc ngẫu nhiên trên bản đồ
   - [ ] Mỗi hạt nhặt được tăng 1 điểm năng lượng
   - [ ] Cứ 5s sẽ mọc 1 hạt mới 
+
+---
+
+## 🧠 Góp ý Gameplay (Design & Balancing)
+
+### Them mục tiêu thắng/thua
+- [ ] Thêm **chế độ chơi có giới hạn thời gian** (vd: 2 phút).
+- [ ] Hoặc: Thêm **goal kill** (ai đạt 10 kill trước sẽ thắng).
+- [ ] Sau khi kết thúc, hiển thị "Game Over" + bảng xếp hạng.
+
+### 🧠 Bot AI chưa đủ khôn
+- [ ] Thêm logic tránh đạn (dựa vào vector đạn).
+- [ ] Nếu HP thấp → bot nên ưu tiên né.
+- [ ] Nếu không thấy player → bot di chuyển ngẫu nhiên theo pattern.
+
+### 🔫 Bắn cần balance thêm
+- [ ] Thêm **cooldown 500ms** giữa các lần bắn.
+- [ ] Giới hạn **tầm bay tối đa** của đạn (range).
+- [ ] Cân nhắc hiệu ứng “nảy” hoặc “dội” nhẹ nếu bắn vào vật cản (về sau).
+
+### ❤️ Máu & hồi máu
+- [ ] Thêm item hồi máu rơi ngẫu nhiên.
+- [ ] Cho phép regen sau khi không bị bắn 5 giây (optional).
+
+### 🏆 Leaderboard + Incentive
+- [ ] Highlight player dẫn đầu (hiệu ứng sáng, viền khác màu).
+- [ ] Tạo **cơ chế “bounty”**: giết người top sẽ +20 điểm.
+- [ ] Cảnh báo nếu có người vượt top (ping “new leader!”).
+
+### 💥 Ultimate Skill (Chiêu đặc biệt)
+- [ ] Đầy năng lượng → dùng ultimate: bắn 10 viên liên tục theo hình quạt.
+- [ ] Có **hiệu ứng charge-up** 1s trước khi xả đạn.
+- [ ] Reset năng lượng nếu chết.
+- [ ] Cho hiển thị "Ultimate Ready!" bằng hiệu ứng nổi bật.
+
+### 🧪 Replay Value / Progression
+- [ ] Thêm **level/EXP**: giết địch +exp → tăng cấp.
+- [ ] Level cao unlock hiệu ứng, màu dot, hoặc skin đặc biệt.
+- [ ] Cho phép chọn màu dot hoặc danh hiệu.
+
+### 🧩 Chế độ chơi về sau
+- [ ] Team Deathmatch (2 team: Red vs Blue)
+- [ ] King of the Hill (chiếm vùng trung tâm lâu nhất)
+- [ ] One Shot Mode (trúng là chết)
+- [ ] Turbo Mode (bắn cực nhanh trong 30s)
+
+---
