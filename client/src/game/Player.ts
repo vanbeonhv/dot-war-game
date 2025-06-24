@@ -6,13 +6,16 @@ export class Player {
   public sprite: Phaser.GameObjects.Arc;
   public nameText: Phaser.GameObjects.Text;
   public healthBar: Phaser.GameObjects.Graphics;
+  public gun: Phaser.GameObjects.Rectangle;
   private scene: Phaser.Scene;
 
   constructor(scene: Phaser.Scene, data: PlayerData) {
     this.scene = scene;
-    this.data = data;
+    this.data = { ...data, score: data.score ?? 0 };
     this.sprite = scene.add.circle(data.x, data.y, 20, Phaser.Display.Color.HexStringToColor(data.color).color);
-    this.nameText = scene.add.text(data.x - 18, data.y - 35, data.isMain ? "You" : data.id, {
+    this.gun = scene.add.rectangle(data.x, data.y, 24, 6, 0xffffff, 1);
+    this.gun.setOrigin(-0.1, 0.5); // Đầu mũi súng nhô ra ngoài
+    this.nameText = scene.add.text(data.x - 18, data.y - 35, data.name || (data.isMain ? "You" : data.id), {
       font: "16px Arial",
       color: "#fff",
     });
@@ -20,28 +23,48 @@ export class Player {
     this.drawHealthBar();
   }
 
+  getScore() {
+    return this.data.score;
+  }
+
+  setScore(score: number) {
+    this.data.score = score;
+  }
+
+  updateGunDirection(targetX: number, targetY: number) {
+    const dx = targetX - this.data.x;
+    const dy = targetY - this.data.y;
+    const angle = Math.atan2(dy, dx);
+    this.gun.setRotation(angle);
+    this.gun.setPosition(this.data.x, this.data.y);
+  }
+
   setPosition(x: number, y: number) {
     this.data.x = x;
     this.data.y = y;
     this.sprite.setPosition(x, y);
+    this.gun.setPosition(x, y);
     this.nameText.setPosition(x - 18, y - 35);
     this.drawHealthBar();
   }
 
   setVisible(visible: boolean) {
     this.sprite.setVisible(visible);
+    this.gun.setVisible(visible);
     this.nameText.setVisible(visible);
     this.healthBar.setVisible(visible);
   }
 
   setAlpha(alpha: number) {
     this.sprite.setAlpha(alpha);
+    this.gun.setAlpha(alpha);
     this.nameText.setAlpha(alpha);
     this.healthBar.setAlpha(alpha);
   }
 
   destroy() {
     this.sprite.destroy();
+    this.gun.destroy();
     this.nameText.destroy();
     this.healthBar.destroy();
   }
@@ -62,5 +85,20 @@ export class Player {
     // Border
     this.healthBar.lineStyle(1, 0xffffff, 1);
     this.healthBar.strokeRect(x, y, barWidth, barHeight);
+  }
+
+  flashGunEffect() {
+    const angle = this.gun.rotation;
+    const fx = this.data.x + Math.cos(angle) * 20;
+    const fy = this.data.y + Math.sin(angle) * 20;
+    const flash = this.scene.add.circle(fx, fy, 7, 0xffffcc, 0.9);
+    this.scene.tweens.add({
+      targets: flash,
+      alpha: 0,
+      scaleX: 2,
+      scaleY: 2,
+      duration: 120,
+      onComplete: () => flash.destroy(),
+    });
   }
 } 

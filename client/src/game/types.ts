@@ -1,10 +1,13 @@
 export interface PlayerData {
   id: string;
+  name?: string;
   x: number;
   y: number;
   color: string;
   isMain: boolean;
   hp: number;
+  score: number;
+  _moveDir?: { x: number; y: number };
 }
 
 export interface BulletData {
@@ -13,6 +16,7 @@ export interface BulletData {
   dx: number;
   dy: number;
   life: number;
+  ownerId: string;
   trail?: Phaser.GameObjects.Arc;
 }
 

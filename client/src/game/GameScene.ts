@@ -36,6 +36,9 @@ export default class GameScene extends Phaser.Scene {
   private pauseMenu!: Phaser.GameObjects.Container;
   private pauseKey!: Phaser.Input.Keyboard.Key;
   private wasPauseKeyPressed: boolean = false;
+  private botMoveTimers: number[] = [];
+  private botShootTimers: number[] = [];
+  private leaderboardText!: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: "GameScene" });
@@ -55,6 +58,7 @@ export default class GameScene extends Phaser.Scene {
         color: PLAYER_COLORS[0],
         isMain: true,
         hp: 3,
+        score: 0,
       }),
       ...Array.from({ length: NUM_FAKE_PLAYERS }).map((_, i) => new Player(this, {
         id: `fake_${i}`,
@@ -62,9 +66,12 @@ export default class GameScene extends Phaser.Scene {
         color: PLAYER_COLORS[(i + 1) % PLAYER_COLORS.length],
         isMain: false,
         hp: 3,
+        score: 0,
       })),
     ];
     this.respawnTimers = this.players.map(() => 0);
+    this.botMoveTimers = this.players.map((p, i) => (i === 0 ? 0 : Math.random() * 2000 + 1000));
+    this.botShootTimers = this.players.map((p, i) => (i === 0 ? 0 : Math.random() * 1500 + 800));
     this.scoreText = this.add.text(10, 10, `Score: ${this.score}`, {
       font: "24px Arial",
       color: "#fff",
@@ -85,6 +92,12 @@ export default class GameScene extends Phaser.Scene {
       }
     });
     this.createPauseMenu();
+    this.leaderboardText = this.add.text(600, 20, '', {
+      font: '20px Arial',
+      color: '#fff',
+      align: 'right',
+    });
+    this.leaderboardText.setDepth(100);
   }
 
   createPauseMenu() {
@@ -110,6 +123,7 @@ export default class GameScene extends Phaser.Scene {
 
   shootBullet(targetX: number, targetY: number) {
     const mainPlayer = this.players[0];
+    mainPlayer.flashGunEffect();
     const dx = targetX - mainPlayer.data.x;
     const dy = targetY - mainPlayer.data.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -122,6 +136,7 @@ export default class GameScene extends Phaser.Scene {
         dx: normalizedDx * BULLET_SPEED,
         dy: normalizedDy * BULLET_SPEED,
         life: 3000,
+        ownerId: mainPlayer.data.id,
       };
       const bullet = new Bullet(this, bulletData);
       this.bullets.push(bullet);
@@ -146,17 +161,30 @@ export default class GameScene extends Phaser.Scene {
       this.respawnTexts[playerIndex] = null;
     }
     player.setVisible(true);
+    player.setAlpha(1);
     player.drawHealthBar();
   }
 
-  updateScore() {
-    this.score += 10;
-    this.scoreText.setText(`Score: ${this.score}`);
-    if (this.score > this.highScore) {
-      this.highScore = this.score;
+  updateScore(ownerId: string) {
+    const player = this.players.find(p => p.data.id === ownerId);
+    if (player) {
+      player.setScore(player.getScore() + 10);
+    }
+    // Cập nhật high score cho player chính
+    const mainPlayer = this.players[0];
+    if (mainPlayer.getScore() > this.highScore) {
+      this.highScore = mainPlayer.getScore();
       this.highScoreText.setText(`High Score: ${this.highScore}`);
       localStorage.setItem('dotWarHighScore', this.highScore.toString());
     }
+    this.updateLeaderboard();
+  }
+
+  updateLeaderboard() {
+    // Sắp xếp theo điểm giảm dần
+    const sorted = [...this.players].sort((a, b) => b.getScore() - a.getScore());
+    const lines = sorted.map((p, idx) => `${idx + 1}. ${(p.data.name || (p.data.isMain ? 'You' : p.data.id)).padEnd(8)}: ${p.getScore()}`);
+    this.leaderboardText.setText(['Leaderboard', ...lines].join('\n'));
   }
 
   update(time: number, delta: number) {
@@ -169,7 +197,15 @@ export default class GameScene extends Phaser.Scene {
     if (this.isPaused) {
       return;
     }
+    const pointer = this.input.activePointer;
     const mainPlayer = this.players[0];
+    mainPlayer.updateGunDirection(pointer.worldX, pointer.worldY);
+    // Bot hướng mũi súng về phía player chính
+    for (let i = 1; i < this.players.length; i++) {
+      const bot = this.players[i];
+      if (this.respawnTimers[i] > 0) continue;
+      bot.updateGunDirection(mainPlayer.data.x, mainPlayer.data.y);
+    }
     let dx = 0, dy = 0;
     if (this.cursors && this.aKey && this.wKey && this.sKey && this.dKey) {
       if (this.cursors.left.isDown || this.aKey.isDown) dx -= 1;
@@ -195,9 +231,9 @@ export default class GameScene extends Phaser.Scene {
       bullet.data.x = bullet.sprite.x;
       bullet.data.y = bullet.sprite.y;
       let hitPlayer = false;
-      for (let j = this.players.length - 1; j >= 0; j--) {
+      for (let j = 0; j < this.players.length; j++) {
         const player = this.players[j];
-        if (j === 0) continue;
+        if (player.data.id === bullet.data.ownerId) continue; // không tự bắn mình
         if (this.respawnTimers[j] > 0) continue;
         const distance = Math.sqrt(
           Math.pow(bullet.data.x - player.data.x, 2) + 
@@ -209,7 +245,7 @@ export default class GameScene extends Phaser.Scene {
           player.drawHealthBar();
           if (player.data.hp <= 0) {
             player.setVisible(false);
-            this.updateScore();
+            this.updateScore(bullet.data.ownerId);
             this.respawnTimers[j] = RESPAWN_TIME;
             const countdownText = this.add.text(player.data.x - 30, player.data.y - 10, "3", {
               font: "24px Arial",
@@ -242,6 +278,34 @@ export default class GameScene extends Phaser.Scene {
         }
       }
     }
+    // Bot di chuyển và bắn
+    for (let i = 1; i < this.players.length; i++) {
+      const bot = this.players[i];
+      if (this.respawnTimers[i] > 0) continue;
+      // Di chuyển ngẫu nhiên
+      this.botMoveTimers[i] -= delta;
+      if (this.botMoveTimers[i] <= 0) {
+        // Chọn hướng mới
+        const angle = Math.random() * Math.PI * 2;
+        bot.data._moveDir = { x: Math.cos(angle), y: Math.sin(angle) };
+        this.botMoveTimers[i] = Math.random() * 2000 + 1000;
+      }
+      // Di chuyển bot
+      if (bot.data._moveDir) {
+        const speed = PLAYER_SPEED * 0.6;
+        const newX = Math.max(PLAYER_RADIUS, Math.min(800 - PLAYER_RADIUS, bot.data.x + bot.data._moveDir.x * speed * (delta / 1000)));
+        const newY = Math.max(PLAYER_RADIUS, Math.min(600 - PLAYER_RADIUS, bot.data.y + bot.data._moveDir.y * speed * (delta / 1000)));
+        bot.setPosition(newX, newY);
+      }
+      // Bắn về phía player chính
+      this.botShootTimers[i] -= delta;
+      if (this.botShootTimers[i] <= 0) {
+        const player = this.players[0];
+        this.shootBotBullet(bot, player);
+        this.botShootTimers[i] = Math.random() * 1500 + 800;
+      }
+    }
+    this.updateLeaderboard();
   }
 
   createHitEffect(x: number, y: number) {
@@ -291,5 +355,26 @@ export default class GameScene extends Phaser.Scene {
         flash.destroy();
       }
     });
+  }
+
+  shootBotBullet(bot: Player, target: Player) {
+    bot.flashGunEffect();
+    const dx = target.data.x - bot.data.x;
+    const dy = target.data.y - bot.data.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance > 0) {
+      const normalizedDx = dx / distance;
+      const normalizedDy = dy / distance;
+      const bulletData: BulletData = {
+        x: bot.data.x + normalizedDx * PLAYER_RADIUS,
+        y: bot.data.y + normalizedDy * PLAYER_RADIUS,
+        dx: normalizedDx * BULLET_SPEED,
+        dy: normalizedDy * BULLET_SPEED,
+        life: 3000,
+        ownerId: bot.data.id,
+      };
+      const bullet = new Bullet(this, bulletData);
+      this.bullets.push(bullet);
+    }
   }
 } 
