@@ -146,6 +146,7 @@ export default class GameScene extends Phaser.Scene {
       this.respawnTexts[playerIndex] = null;
     }
     player.setVisible(true);
+    player.drawHealthBar();
   }
 
   updateScore() {
@@ -204,15 +205,18 @@ export default class GameScene extends Phaser.Scene {
         );
         if (distance < PLAYER_RADIUS + BULLET_RADIUS) {
           this.createHitEffect(player.data.x, player.data.y);
-          player.setVisible(false);
-          player.data.hp = 3; // reset máu khi respawn
-          this.updateScore();
-          this.respawnTimers[j] = RESPAWN_TIME;
-          const countdownText = this.add.text(player.data.x - 30, player.data.y - 10, "3", {
-            font: "24px Arial",
-            color: "#ff0000",
-          });
-          this.respawnTexts[j] = countdownText;
+          player.data.hp -= 1;
+          player.drawHealthBar();
+          if (player.data.hp <= 0) {
+            player.setVisible(false);
+            this.updateScore();
+            this.respawnTimers[j] = RESPAWN_TIME;
+            const countdownText = this.add.text(player.data.x - 30, player.data.y - 10, "3", {
+              font: "24px Arial",
+              color: "#ff0000",
+            });
+            this.respawnTexts[j] = countdownText;
+          }
           hitPlayer = true;
           break;
         }
