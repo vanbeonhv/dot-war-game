@@ -80,6 +80,18 @@
   - ✅ Hiệu ứng respawn (fade in/out cho sprite và tên)
   - ✅ Hiệu ứng di chuyển mượt mà hơn (trail effect cho đạn)
 
+- [ ] **Gameplay nâng cao**
+  - [ ] Mỗi nhân vật có máu (HP), mặc định 3 điểm
+  - [ ] Trúng đạn 3 lần sẽ chết (bị loại khỏi vòng chơi hoặc respawn lại từ đầu)
+  - [ ] Hiển thị thanh máu trên đầu nhân vật
+  - [ ] Bot (fake player) di chuyển ngẫu nhiên
+  - [ ] Bot có thể bắn đạn về phía player hoặc ngẫu nhiên
+
+- [ ] **Refactor & Code Structure**
+  - [ ] Tách logic game khỏi UI (GameScene, Player, Bullet, Bot...)
+  - [ ] Phân tách file: src/game/ (logic), src/components/ (UI), src/types/
+  - [ ] Chuẩn hóa code, dễ mở rộng cho multiplayer
+
 - [ ] **Game settings**
   - [ ] Tùy chỉnh tốc độ di chuyển
   - [ ] Tùy chỉnh tốc độ đạn
