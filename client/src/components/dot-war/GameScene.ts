@@ -1,7 +1,7 @@
 import Phaser from "phaser";
-import type { PlayerData, BulletData, BotData } from "./types";
-import { Player } from "./Player";
 import { Bullet } from "./Bullet";
+import { Player } from "./Player";
+import type { BulletData } from "./types";
 
 const PLAYER_COLORS = ["#e63946", "#457b9d", "#f1faee", "#a8dadc", "#ffbe0b", "#8338ec", "#3a86ff"];
 const PLAYER_RADIUS = 20;
