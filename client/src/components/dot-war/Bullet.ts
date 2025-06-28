@@ -10,7 +10,10 @@ export class Bullet {
   constructor(scene: Phaser.Scene, data: BulletData) {
     this.scene = scene;
     this.data = data;
-    this.sprite = scene.add.circle(data.x, data.y, 5, 0xffff00);
+    // Đạn ultimate màu xanh dương, đạn thường màu vàng
+    const color = data.isUltimate ? 0x00cfff : 0xffe066;
+    this.sprite = scene.add.circle(data.x, data.y, 6, color, 1);
+    this.sprite.setDepth(15);
     if (data.trail) {
       this.trail = scene.add.circle(
         data.x - (data.dx / 400) * 10,

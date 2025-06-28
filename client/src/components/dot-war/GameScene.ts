@@ -53,6 +53,7 @@ export default class GameScene extends Phaser.Scene {
   private leaderboardText!: Phaser.GameObjects.Text;
   private obstacles: Phaser.GameObjects.Rectangle[] = [];
   private youLineText?: Phaser.GameObjects.Text;
+  private ultimateKey!: Phaser.Input.Keyboard.Key;
 
   constructor() {
     super({ key: "GameScene" });
@@ -73,6 +74,8 @@ export default class GameScene extends Phaser.Scene {
         isMain: true,
         hp: 3,
         score: 0,
+        energy: 0,
+        maxEnergy: 5,
       }),
       ...Array.from({ length: NUM_FAKE_PLAYERS }).map((_, i) => new Player(this, {
         id: `bot_${i}`,
@@ -82,6 +85,8 @@ export default class GameScene extends Phaser.Scene {
         isMain: false,
         hp: 3,
         score: 0,
+        energy: 0,
+        maxEnergy: 5,
       })),
     ];
     this.respawnTimers = this.players.map(() => 0);
@@ -93,6 +98,7 @@ export default class GameScene extends Phaser.Scene {
     this.sKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.S) as Phaser.Input.Keyboard.Key;
     this.dKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.D) as Phaser.Input.Keyboard.Key;
     this.pauseKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC) as Phaser.Input.Keyboard.Key;
+    this.ultimateKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.Q) as Phaser.Input.Keyboard.Key;
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if (!this.isPaused && this.respawnTimers[0] <= 0) {
         this.shootBullet(pointer.x, pointer.y);
@@ -161,6 +167,7 @@ export default class GameScene extends Phaser.Scene {
         dy: normalizedDy * BULLET_SPEED,
         life: 3000,
         ownerId: mainPlayer.data.id,
+        isUltimate: true,
       };
       const bullet = new Bullet(this, bulletData);
       this.bullets.push(bullet);
@@ -257,6 +264,37 @@ export default class GameScene extends Phaser.Scene {
     const pointer = this.input.activePointer;
     const mainPlayer = this.players[0];
     mainPlayer.updateGunDirection(pointer.worldX, pointer.worldY);
+    // Ultimate: nhấn Q khi đủ energy và không respawn
+    if (
+      this.ultimateKey &&
+      Phaser.Input.Keyboard.JustDown(this.ultimateKey) &&
+      (mainPlayer.data.energy ?? 0) >= (mainPlayer.data.maxEnergy ?? 5) &&
+      this.respawnTimers[0] <= 0
+    ) {
+      // Bắn 10 viên đạn spread ±45 độ quanh hướng chuột
+      const baseAngle = Math.atan2(pointer.worldY - mainPlayer.data.x, pointer.worldX - mainPlayer.data.y);
+      const spread = Math.PI / 4; // ±45 độ
+      const numBullets = 10;
+      for (let i = 0; i < numBullets; i++) {
+        const t = i / (numBullets - 1);
+        const angle = baseAngle - spread / 2 + t * spread;
+        const dx = Math.cos(angle);
+        const dy = Math.sin(angle);
+        const bulletData: BulletData = {
+          x: mainPlayer.data.x + dx * PLAYER_RADIUS,
+          y: mainPlayer.data.y + dy * PLAYER_RADIUS,
+          dx: dx * BULLET_SPEED,
+          dy: dy * BULLET_SPEED,
+          life: 3000,
+          ownerId: mainPlayer.data.id,
+          isUltimate: true,
+        };
+        const bullet = new Bullet(this, bulletData);
+        this.bullets.push(bullet);
+      }
+      mainPlayer.data.energy = 0;
+      mainPlayer.drawHealthBar();
+    }
     // Bot hướng mũi súng về phía player chính
     for (let i = 1; i < this.players.length; i++) {
       const bot = this.players[i];
@@ -307,6 +345,14 @@ export default class GameScene extends Phaser.Scene {
           player.drawHealthBar();
           if (player.data.hp <= 0) {
             player.setVisible(false);
+            // Tăng energy cho người bắn nếu không tự bắn mình
+            if (bullet.data.ownerId !== player.data.id) {
+              const shooter = this.players.find(p => p.data.id === bullet.data.ownerId);
+              if (shooter && typeof shooter.data.energy === 'number' && typeof shooter.data.maxEnergy === 'number') {
+                shooter.data.energy = Math.min(shooter.data.energy + 1, shooter.data.maxEnergy);
+                shooter.drawHealthBar();
+              }
+            }
             this.updateScore(bullet.data.ownerId);
             this.respawnTimers[j] = RESPAWN_TIME;
             const countdownText = this.add.text(player.data.x - 30, player.data.y - 10, "3", {

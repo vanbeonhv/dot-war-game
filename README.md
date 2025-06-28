@@ -41,11 +41,11 @@
 - [x] Cộng điểm khi bắn chết bot
 
 ### 4. Ultimate Skill (Tuyệt chiêu)
-- [ ] Thêm thanh năng lượng (energy bar) cho mỗi nhân vật, tối đa 5 điểm
-- [ ] Tiêu diệt 1 địch được +1 energy (không tăng khi tự sát hoặc đối thủ chết do nguyên nhân khác)
-- [ ] Đầy năng lượng (5/5) sẽ kích hoạt được ultimate: bắn liên tiếp 10 viên đạn theo hình quạt (spread shot ±45 độ quanh hướng chuột)
-- [ ] Khi đầy năng lượng, player có hiệu ứng nổi bật (viền sáng, nhấp nháy, hoặc glow). Có thể thêm popup nhỏ "Ultimate Ready!" trên đầu player
-- [ ] Đạn ultimate có hiệu ứng đặc biệt (màu khác, particle effect, tốc độ nhanh hơn)
+- [x] Thêm thanh năng lượng (energy bar) cho mỗi nhân vật, tối đa 5 điểm
+- [x] Tiêu diệt 1 địch được +1 energy (không tăng khi tự sát hoặc đối thủ chết do nguyên nhân khác)
+- [x] Đầy năng lượng (5/5) sẽ kích hoạt được ultimate: bắn liên tiếp 10 viên đạn theo hình quạt (spread shot ±45 độ quanh hướng chuột)
+- [x] Khi đầy năng lượng, player có hiệu ứng nổi bật (viền sáng, nhấp nháy, hoặc glow). Có thể thêm popup nhỏ "Ultimate Ready!" trên đầu player
+- [x] Đạn ultimate có hiệu ứng đặc biệt (màu khác, particle effect, tốc độ nhanh hơn)
 - [ ] Chết sẽ reset năng lượng về 0
 - [ ] Không thể tích lũy energy vượt quá 5
 - [ ] Chỉ dùng ultimate khi còn sống, không đang respawn

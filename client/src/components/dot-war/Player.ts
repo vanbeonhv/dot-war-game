@@ -8,10 +8,12 @@ export class Player {
   public healthBar: Phaser.GameObjects.Graphics;
   public gun: Phaser.GameObjects.Rectangle;
   private scene: Phaser.Scene;
+  private glowCircle?: Phaser.GameObjects.Arc;
+  private ultimateText?: Phaser.GameObjects.Text;
 
   constructor(scene: Phaser.Scene, data: PlayerData) {
     this.scene = scene;
-    this.data = { ...data, score: data.score ?? 0 };
+    this.data = { ...data, score: data.score ?? 0, energy: data.energy ?? 0, maxEnergy: data.maxEnergy ?? 5 };
     this.sprite = scene.add.circle(data.x, data.y, 20, Phaser.Display.Color.HexStringToColor(data.color).color);
     this.gun = scene.add.rectangle(data.x, data.y, 24, 6, 0xffffff, 1);
     this.gun.setOrigin(-0.1, 0.5); // Đầu mũi súng nhô ra ngoài
@@ -53,6 +55,9 @@ export class Player {
     this.gun.setVisible(visible);
     this.nameText.setVisible(visible);
     this.healthBar.setVisible(visible);
+    this.drawHealthBar();
+    if (this.glowCircle) this.glowCircle.setVisible(visible && (this.data.isMain && (this.data.energy ?? 0) >= (this.data.maxEnergy ?? 5)));
+    if (this.ultimateText) this.ultimateText.setVisible(visible && (this.data.isMain && (this.data.energy ?? 0) >= (this.data.maxEnergy ?? 5)));
   }
 
   setAlpha(alpha: number) {
@@ -67,6 +72,8 @@ export class Player {
     this.gun.destroy();
     this.nameText.destroy();
     this.healthBar.destroy();
+    if (this.glowCircle) this.glowCircle.destroy();
+    if (this.ultimateText) this.ultimateText.destroy();
   }
 
   drawHealthBar() {
@@ -75,16 +82,64 @@ export class Player {
     const barHeight = 6;
     const x = this.data.x - barWidth / 2;
     const y = this.data.y - 50;
-    // Background
+    // Background máu
     this.healthBar.fillStyle(0x333333, 1);
     this.healthBar.fillRect(x, y, barWidth, barHeight);
     // HP
     const hpPercent = Math.max(0, this.data.hp) / 3;
     this.healthBar.fillStyle(0x00ff00, 1);
     this.healthBar.fillRect(x, y, barWidth * hpPercent, barHeight);
-    // Border
+    // Border máu
     this.healthBar.lineStyle(1, 0xffffff, 1);
     this.healthBar.strokeRect(x, y, barWidth, barHeight);
+    // Energy bar (vẽ dưới thanh máu)
+    const energyBarY = y + barHeight + 3;
+    this.healthBar.fillStyle(0x222299, 1); // nền energy
+    this.healthBar.fillRect(x, energyBarY, barWidth, barHeight - 2);
+    const energyPercent = Math.max(0, this.data.energy ?? 0) / (this.data.maxEnergy ?? 5);
+    this.healthBar.fillStyle(0x00cfff, 1); // màu energy
+    this.healthBar.fillRect(x, energyBarY, barWidth * energyPercent, barHeight - 2);
+    this.healthBar.lineStyle(1, 0xffffff, 0.7);
+    this.healthBar.strokeRect(x, energyBarY, barWidth, barHeight - 2);
+
+    // Nếu player không visible (chết/respawn) thì ẩn hiệu ứng
+    if (!this.sprite.visible) {
+      if (this.glowCircle) this.glowCircle.setVisible(false);
+      if (this.ultimateText) this.ultimateText.setVisible(false);
+      return;
+    }
+    // Hiệu ứng glow và popup khi đủ energy
+    if (this.data.isMain && (this.data.energy ?? 0) >= (this.data.maxEnergy ?? 5)) {
+      // Glow
+      if (!this.glowCircle) {
+        this.glowCircle = this.scene.add.circle(this.data.x, this.data.y, 28, 0xffe066, 0.4);
+        this.glowCircle.setDepth(10);
+        this.scene.tweens.add({
+          targets: this.glowCircle,
+          alpha: 0.1,
+          duration: 500,
+          yoyo: true,
+          repeat: -1
+        });
+      }
+      this.glowCircle.setPosition(this.data.x, this.data.y);
+      this.glowCircle.setVisible(true);
+      // Popup
+      if (!this.ultimateText) {
+        this.ultimateText = this.scene.add.text(this.data.x, this.data.y - 60, 'Ultimate Ready!', {
+          font: 'bold 16px Arial',
+          color: '#ffe066',
+          stroke: '#000',
+          strokeThickness: 3,
+        }).setOrigin(0.5);
+        this.ultimateText.setDepth(20);
+      }
+      this.ultimateText.setPosition(this.data.x, this.data.y - 60);
+      this.ultimateText.setVisible(true);
+    } else {
+      if (this.glowCircle) this.glowCircle.setVisible(false);
+      if (this.ultimateText) this.ultimateText.setVisible(false);
+    }
   }
 
   flashGunEffect() {

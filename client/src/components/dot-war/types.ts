@@ -8,6 +8,8 @@ export interface PlayerData {
   hp: number;
   score: number;
   _moveDir?: { x: number; y: number };
+  energy?: number;
+  maxEnergy?: number;
 }
 
 export interface BulletData {
@@ -18,6 +20,7 @@ export interface BulletData {
   life: number;
   ownerId: string;
   trail?: Phaser.GameObjects.Arc;
+  isUltimate?: boolean;
 }
 
 export interface BotData extends PlayerData {
