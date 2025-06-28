@@ -24,8 +24,12 @@ function getSafeRandomPos(scene: GameScene, radius: number) {
   do {
     pos = getRandomPos(800, 600);
     tries++;
-  } while (scene.isCollidingObstacle(pos.x, pos.y, radius) && tries < 50);
-  return pos;
+    if (!scene.isCollidingObstacle(pos.x, pos.y, radius)) {
+      return pos;
+    }
+  } while (tries < 200);
+  // Nếu thử 200 lần vẫn không được, trả về giữa map
+  return { x: 400, y: 300 };
 }
 
 export default class GameScene extends Phaser.Scene {
@@ -40,8 +44,6 @@ export default class GameScene extends Phaser.Scene {
   private respawnTexts: (Phaser.GameObjects.Text | null)[] = [];
   private score: number = 0;
   private highScore: number = 0;
-  private scoreText!: Phaser.GameObjects.Text;
-  private highScoreText!: Phaser.GameObjects.Text;
   private isPaused: boolean = false;
   private pauseMenu!: Phaser.GameObjects.Container;
   private pauseKey!: Phaser.Input.Keyboard.Key;
@@ -50,6 +52,7 @@ export default class GameScene extends Phaser.Scene {
   private botShootTimers: number[] = [];
   private leaderboardText!: Phaser.GameObjects.Text;
   private obstacles: Phaser.GameObjects.Rectangle[] = [];
+  private youLineText?: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: "GameScene" });
@@ -72,7 +75,8 @@ export default class GameScene extends Phaser.Scene {
         score: 0,
       }),
       ...Array.from({ length: NUM_FAKE_PLAYERS }).map((_, i) => new Player(this, {
-        id: `fake_${i}`,
+        id: `bot_${i}`,
+        name: `bot_${i}`,
         ...getSafeRandomPos(this, PLAYER_RADIUS),
         color: PLAYER_COLORS[(i + 1) % PLAYER_COLORS.length],
         isMain: false,
@@ -83,14 +87,6 @@ export default class GameScene extends Phaser.Scene {
     this.respawnTimers = this.players.map(() => 0);
     this.botMoveTimers = this.players.map((p, i) => (i === 0 ? 0 : Math.random() * 2000 + 1000));
     this.botShootTimers = this.players.map((p, i) => (i === 0 ? 0 : Math.random() * 1500 + 800));
-    this.scoreText = this.add.text(10, 10, `Score: ${this.score}`, {
-      font: "24px Arial",
-      color: "#fff",
-    });
-    this.highScoreText = this.add.text(10, 40, `High Score: ${this.highScore}`, {
-      font: "20px Arial",
-      color: "#ffff00",
-    });
     this.cursors = this.input?.keyboard?.createCursorKeys() as Phaser.Types.Input.Keyboard.CursorKeys;
     this.wKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.W) as Phaser.Input.Keyboard.Key;
     this.aKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.A) as Phaser.Input.Keyboard.Key;
@@ -107,6 +103,11 @@ export default class GameScene extends Phaser.Scene {
       font: '20px Arial',
       color: '#fff',
       align: 'right',
+      wordWrap: { width: 200 },
+      fontStyle: 'normal',
+      // rich text bật ở đây
+      // @ts-ignore
+      rich: true,
     });
     this.leaderboardText.setDepth(100);
     // Sinh ngẫu nhiên vật cản
@@ -199,8 +200,6 @@ export default class GameScene extends Phaser.Scene {
     const mainPlayer = this.players[0];
     if (mainPlayer.getScore() > this.highScore) {
       this.highScore = mainPlayer.getScore();
-      this.highScoreText.setText(`High Score: ${this.highScore}`);
-      localStorage.setItem('dotWarHighScore', this.highScore.toString());
     }
     this.updateLeaderboard();
   }
@@ -208,8 +207,21 @@ export default class GameScene extends Phaser.Scene {
   updateLeaderboard() {
     // Sắp xếp theo điểm giảm dần
     const sorted = [...this.players].sort((a, b) => b.getScore() - a.getScore());
-    const lines = sorted.map((p, idx) => `${idx + 1}. ${(p.data.name || (p.data.isMain ? 'You' : p.data.id)).padEnd(8)}: ${p.getScore()}`);
+    const maxNameLen = Math.max(...sorted.map(p => (p.data.isMain ? 'You ★' : p.data.name || p.data.id).length), 8);
+    const maxScoreLen = Math.max(...sorted.map(p => p.getScore().toString().length), 2);
+    const lines = sorted.map((p, idx) => {
+      let name = p.data.isMain ? 'You ★' : (p.data.name || p.data.id);
+      let score = p.getScore().toString();
+      name = name.padEnd(maxNameLen, ' ');
+      score = score.padStart(maxScoreLen, ' ');
+      return `${(idx + 1).toString().padEnd(2)}. ${name} : ${score}`;
+    });
     this.leaderboardText.setText(['Leaderboard', ...lines].join('\n'));
+    // Xoá text object youLineText nếu có
+    if (this.youLineText) {
+      this.youLineText.destroy();
+      this.youLineText = undefined;
+    }
   }
 
   // Helper: kiểm tra va chạm player với obstacle
