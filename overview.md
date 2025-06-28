@@ -1,76 +1,37 @@
-# 🕹️ Dot War – Realtime 2D Multiplayer Game (Web)
+# 🕹️ Dot War – Realtime 2D Single Player Game (Web)
 
 ## 📌 Mục tiêu dự án
 
-Xây dựng một game 2D realtime đơn giản, hoạt động trên web, sử dụng WebSocket để đồng bộ trạng thái giữa nhiều người chơi. Người chơi điều khiển các "dot" (chấm tròn), bắn nhau để ghi điểm. Dự án nhằm mục tiêu học kiến trúc realtime, quản lý socket, sync state, và xử lý backend tối ưu.
+Xây dựng một game 2D single player đơn giản, hoạt động trên web. Người chơi điều khiển các "dot" (chấm tròn), bắn nhau với bot để ghi điểm. Dự án nhằm mục tiêu học kiến trúc game loop, quản lý state, xử lý va chạm, hiệu ứng, và tối ưu UI/UX cho game frontend.
 
 ---
 
 ## ✅ Tính năng chính
 
-- Realtime multiplayer (5–10 người chơi)
+- Single player (đối đầu với nhiều bot)
 - Di chuyển bằng WASD
 - Bắn đạn bằng chuột
 - Va chạm đạn ↔ player → chết → respawn
-- Cộng điểm người bắn
-- Hiển thị leaderboard top điểm số
+- Cộng điểm khi bắn bot
+- Hiển thị leaderboard điểm số
 - Tối giản asset (chấm tròn, đạn tròn, background đơn sắc)
-- Phân tách rõ client/server
-
----
-## folder 
-client/
-├── index.html
-├── vite.config.ts
-├── tailwind.config.cjs
-├── postcss.config.cjs
-├── src/
-│   ├── main.tsx
-│   ├── App.tsx
-│   ├── index.css
-│   ├── components/
-│   │   └── Leaderboard.tsx
-│   ├── game/
-│   │   ├── scenes/
-│   │   │   └── MainScene.ts
-│   │   ├── types.ts
-│   │   └── utils.ts
-│   └── GameCanvas.tsx
+- Code tách bạch UI/game logic, dễ mở rộng
 
 ---
 
 ## 🧱 Tech Stack
 
-
-
 ### 🖥️ Client (Web Game UI)
-- **pnpm** - Thay the npm
+- **pnpm** - Quản lý package
 - **React** – UI, quản lý trạng thái, component
 - **Vite** – Dev server + bundling (siêu nhanh)
 - **Phaser 3** – Game engine 2D (canvas, scene, physics)
 - **Tailwind CSS** – UI nhanh gọn (cho menu, HUD, leaderboard)
-- **WebSocket (browser)** – Giao tiếp realtime với server
 
-### 🔌 Server (Backend)
-
-- **.NET Core (ASP.NET 8)** – Xử lý logic game + socket server
-- **WebSocket (System.Net.WebSockets)** – Kết nối realtime
-- **REST API** – Leaderboard, login
-- **Dapper** – ORM nhẹ cho truy vấn nhanh
-- **PostgreSQL** – Lưu dữ liệu điểm, người chơi
-
-### ⚙️ Hạ tầng
-
-- **VPS Ubuntu (1 CPU / 2GB RAM)** – Đủ chạy 5–10 người
-- **Nginx (optional)** – Reverse proxy
-- **Certbot (optional)** – HTTPS nếu deploy public
-- **Docker (optional)** – Container hóa backend nếu muốn scale sau này
 ---
-
 
 ## 🧠 Ghi chú kỹ thuật
 
-- Game chạy client-authoritative nhưng kiểm tra va chạm từ server
-- Tick rate dự kiến: 30 FPS (WebSocket update mỗi 33ms)
-- Dữ liệu sync: `{ id, x, y, direction, bullets }`
-- Server side giữ state đầy đủ: player, bullet, score
+- Game chạy hoàn toàn trên client, không có backend
+- Logic va chạm, điểm số, bot, hiệu ứng đều xử lý local
+- Dễ dàng mở rộng thêm chế độ chơi, bot AI, hiệu ứng, v.v.

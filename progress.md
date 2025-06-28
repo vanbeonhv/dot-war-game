@@ -1,226 +1,75 @@
-# 📊 Progress - Dot War Game
+# 📊 Progress - Dot War Game (Single Player)
 
 ## 🎯 Tổng quan
-- **Dự án:** Dot War - Realtime 2D Multiplayer Game
-- **Ngày bắt đầu:** Hôm nay
-- **Trạng thái:** Phase 1 - Client Gameplay (Ưu tiên cao)
+- **Dự án:** Dot War - 2D Single Player Game
+- **Trạng thái:** Đang phát triển
 
 ---
 
-## ✅ Đã hoàn thành
+## ✅ Checklist phát triển
 
-### Phase 1: Client Setup & Core Gameplay
-- [x] **React + Vite + Tailwind scaffold**
-  - ✅ Tạo dự án React với TypeScript
-  - ✅ Cài đặt và cấu hình Tailwind CSS
-  - ✅ Cài đặt Phaser game engine
-  - ✅ Tích hợp Phaser vào React (GameCanvas)
+### 1. Khởi tạo & Cơ bản
+- [x] Scaffold React + Vite + Tailwind
+- [x] Cài đặt Phaser 3
+- [x] Tích hợp canvas game vào React (GameCanvas)
 
-- [x] **Player di chuyển bằng WASD**
-  - ✅ Thêm logic điều khiển player bằng WASD/Arrow keys
-  - ✅ Player di chuyển mượt mà trong canvas
-  - ✅ Giới hạn player trong màn chơi
+### 2. Gameplay Core
+- [x] Player di chuyển bằng WASD
+- [x] Bắn đạn bằng chuột
+- [x] Đạn va chạm player (chết, respawn)
+- [x] Giới hạn player trong màn chơi
+- [x] Hiển thị nhiều bot (fake player), mỗi bot màu khác nhau
+- [x] Bot di chuyển ngẫu nhiên, có thể bắn về phía player
+- [x] Va chạm đạn ↔ player, bot chết sẽ respawn
+- [x] Không thể tự bắn mình
+- [x] Hiển thị tên, máu, điểm số
+- [x] Hiển thị leaderboard điểm số
+- [x] Vật cản (obstacle) random trên bản đồ, không thể đi/bắn xuyên qua
 
-- [x] **Render nhiều player**
-  - ✅ Tạo cấu trúc dữ liệu quản lý nhiều player
-  - ✅ Hiển thị 6 dot (1 player chính + 5 fake players)
-  - ✅ Mỗi dot có màu sắc và tên riêng
+### 3. Nâng cao & Polish
+- [x] Hiệu ứng đạn nổ, particle, flash, explosion
+- [x] Hiệu ứng respawn (fade in/out, countdown)
+- [x] Hiệu ứng di chuyển mượt mà hơn (trail effect cho đạn)
+- [x] HUD hiển thị điểm số, high score
+- [x] Menu pause/resume (ESC key)
+- [x] Refactor code: tách logic game khỏi UI, chuẩn hóa code
+- [x] Leaderboard realtime (local)
+- [x] Bot có thể bắn đạn về phía player
+- [x] Mỗi nhân vật có máu (HP), mặc định 3 điểm
+- [x] Trúng đạn 3 lần sẽ chết (respawn lại từ đầu)
+- [x] Hiển thị thanh máu trên đầu nhân vật
+- [x] Cộng điểm khi bắn chết bot
 
-- [x] **Va chạm đạn ↔ player**
-  - ✅ Phát hiện va chạm giữa đạn và player
-  - ✅ Player bị bắn sẽ "chết" (biến mất)
-  - ✅ Hiệu ứng đơn giản khi player chết (explosion animation)
-  - ✅ Không thể tự bắn mình
+### 4. Ultimate Skill (Tuyệt chiêu)
+- [ ] Thêm thanh năng lượng (energy bar) cho mỗi nhân vật, tối đa 5 điểm
+- [ ] Tiêu diệt 1 địch được +1 energy (không tăng khi tự sát hoặc đối thủ chết do nguyên nhân khác)
+- [ ] Đầy năng lượng (5/5) sẽ kích hoạt được ultimate: bắn liên tiếp 10 viên đạn theo hình quạt (spread shot ±45 độ quanh hướng chuột)
+- [ ] Khi đầy năng lượng, player có hiệu ứng nổi bật (viền sáng, nhấp nháy, hoặc glow). Có thể thêm popup nhỏ "Ultimate Ready!" trên đầu player
+- [ ] Đạn ultimate có hiệu ứng đặc biệt (màu khác, particle effect, tốc độ nhanh hơn)
+- [ ] Chết sẽ reset năng lượng về 0
+- [ ] Không thể tích lũy energy vượt quá 5
+- [ ] Chỉ dùng ultimate khi còn sống, không đang respawn
+- [ ] Không có cooldown cho ultimate (có thể dùng liên tục nếu đủ energy)
+- [ ] Ultimate chỉ bắn về hướng chuột, spread ±45 độ quanh hướng chuột
+- [ ] Âm thanh: Có hiệu ứng âm thanh khi kích hoạt ultimate
 
-- [x] **Respawn logic**
-  - ✅ Player chết sẽ respawn sau 3 giây
-  - ✅ Vị trí respawn ngẫu nhiên
-  - ✅ Hiển thị countdown respawn (3, 2, 1 giây)
-  - ✅ Player đang respawn không thể bị bắn
+#### Hướng mở rộng về sau
+- [ ] Ultimate có thể có cooldown (ví dụ: 5 giây sau khi dùng mới được dùng tiếp)
+- [ ] Ultimate có thể gây hiệu ứng đặc biệt lên đối thủ (làm chậm, choáng, v.v.)
+- [ ] Có thể nâng cấp ultimate (bắn nhiều viên hơn, damage cao hơn, hiệu ứng đẹp hơn)
+- [ ] Thêm nhiều loại ultimate khác nhau cho từng nhân vật
+- [ ] Thêm thông báo nổi bật khi player dùng ultimate thành công
+- [ ] Bot có thể tự động dùng ultimate khi đủ energy
+- [ ] Ultimate có thể phá vật cản hoặc xuyên qua nhiều đối thủ
 
-- [x] **Score system (local)**
-  - ✅ Đếm số lần bắn trúng (+10 điểm mỗi lần)
-  - ✅ Hiển thị điểm số trên màn hình
-  - ✅ Lưu điểm cao nhất (localStorage)
-  - ✅ Tên player biến mất khi chết và xuất hiện lại khi respawn
-
-- [x] **Game UI**
-  - ✅ HUD hiển thị điểm số, high score
-  - ✅ Menu pause/resume (ESC key)
-  - [ ] Màn hình game over
-
----
-
-## 🚧 Đang làm
-
-### Lỗi cần sửa (Ưu tiên cao)
-- [x] **Fix Phaser.Class error**
-  - ✅ Đã refactor scene để sử dụng ES6 class
-  - ⚠️ Còn lỗi TypeScript null check (không ảnh hưởng chạy game)
-
-- [x] **Fix pause/resume bug**
-  - ✅ Đã sửa logic pause/resume
-  - ✅ ESC key hoạt động bình thường
-
-### Tính năng đang phát triển
-- [x] **Bắn đạn bằng chuột**
-  - ✅ Click chuột để bắn đạn
-  - ✅ Đạn di chuyển theo hướng chuột
-  - ✅ Hiển thị đạn trên màn hình (màu vàng)
-  - ✅ Đạn tự động biến mất sau 3 giây hoặc ra khỏi màn hình
-
-- [x] **Score system (local)**
-  - [ ] Đếm số lần bắn trúng
-  - [ ] Hiển thị điểm số trên màn hình
-  - [ ] Lưu điểm cao nhất (localStorage)
-
-- [x] **Visual effects (Polish)**
-  - ✅ Hiệu ứng đạn nổ đẹp hơn (particle effects, flash, explosion)
-  - ✅ Particle effects khi player chết (8 particles bay ra ngoài)
-  - ✅ Hiệu ứng respawn (fade in/out cho sprite và tên)
-  - ✅ Hiệu ứng di chuyển mượt mà hơn (trail effect cho đạn)
-
-- [x] **Gameplay nâng cao**
-  - ✅ Mỗi nhân vật có máu (HP), mặc định 3 điểm
-  - ✅ Trúng đạn 3 lần sẽ chết (respawn lại từ đầu)
-  - ✅ Hiển thị thanh máu trên đầu nhân vật
-  - ✅ Bot (fake player) di chuyển ngẫu nhiên
-  - ✅ Bot có thể bắn đạn về phía player
-  - ✅ Bot và player đều có điểm, cộng điểm khi bắn chết đối thủ
-  - ✅ Vật cản (obstacle) random trên bản đồ, không thể đi/bắn xuyên qua
-  - ✅ Khi spawn/respawn, vị trí luôn hợp lệ, không bị kẹt trên obstacle
-
-- [x] **Leaderboard**
-  - ✅ Hiển thị realtime ở góc phải trên, sắp xếp theo điểm
-  - ✅ Hiển thị cả bot và player chính
-
-- [x] **Gun & Shooting Polish**
-  - ✅ Mỗi nhân vật có mũi súng (hình chữ nhật) hướng theo chuột hoặc mục tiêu
-  - ✅ Hiệu ứng flash khi bắn
-  - ✅ Sửa bug mất mũi súng sau khi respawn
-
-- [ ] **Refactor & Code Structure**
-  - [ ] Tách logic game khỏi UI (GameScene, Player, Bullet, Bot...)
-  - [ ] Phân tách file: src/game/ (logic), src/components/ (UI), src/types/
-  - [ ] Chuẩn hóa code, dễ mở rộng cho multiplayer
-
-- [ ] **Game settings**
-  - [ ] Tùy chỉnh tốc độ di chuyển
-  - [ ] Tùy chỉnh tốc độ đạn
-  - [ ] Toggle sound effects
-
-### Phase 3: UI/UX Polish (Client-side)
-- [x] **Game UI**
-  - ✅ HUD hiển thị điểm số, high score
-  - ✅ Menu pause/resume (ESC key)
-  - ⚠️ Màn hình game over (để sau)
-
-### Phase 4: Multiplayer Preparation
-- [ ] **Refactor code structure**
-  - [ ] Tách logic game ra khỏi UI
-  - [ ] Chuẩn bị cấu trúc cho WebSocket
-  - [ ] Tạo game state management
-
----
-
-## 🔄 Server-side (Để sau)
-
-### Phase 5: WebSocket + Sync
-- [ ] **Gửi + nhận vị trí giữa các client**
-- [ ] **Quản lý danh sách player (id, name, x, y)**
-- [ ] **Sync đạn & collision**
-
-### Phase 6: Leaderboard + API
-- [ ] **Server tính điểm**
-- [ ] **REST API: `/api/leaderboard`**
-- [ ] **React UI hiển thị top điểm**
-
----
-
-## 🎮 Tính năng game hiện tại
-- ✅ Màn chơi 800x600 với background xanh đậm
-- ✅ 6 dot (player) với màu sắc khác nhau
-- ✅ Player chính (You) điều khiển được bằng WASD
-- ✅ 5 fake players đứng yên (để test)
-- ✅ Tên hiển thị trên đầu mỗi dot
-
----
-
-## 🔧 Tech Stack đã setup
-- ✅ **Client:** React 19 + TypeScript + Vite
-- ✅ **Styling:** Tailwind CSS
-- ✅ **Game Engine:** Phaser 3.90.0
-- ✅ **Package Manager:** pnpm
-
----
-
-## 📝 Ghi chú
-- **Ưu tiên:** Sửa lỗi Phaser.Class → Bắn đạn → Va chạm → Respawn
-- **Server:** Để sau khi client gameplay hoàn thiện
-- **Focus:** Tạo game loop hoàn chỉnh trước khi làm multiplayer 
-
-## 💡 Ý tưởng & Tính năng mở rộng (TODO)
-
-- **Địa hình**
-  - [x] Thêm vật cản (obstacle) trên bản đồ
-  - [x] Vật cản không thể di chuyển qua, đạn cũng không bắn xuyên qua
-
-- **Tuyệt chiêu (Ultimate Skill)**
-  - [ ] Thêm thanh năng lượng (energy bar) cho mỗi nhân vật
-  - [ ] Thanh năng lượng tối đa 5 điểm, tiêu diệt 1 địch được 1 điểm
-  - [ ] Đầy năng lượng sẽ kích hoạt tuyệt chiêu: bắn liên tiếp 10 viên đạn
-  - [ ] Khi đầy năng lượng, nhân vật có hiệu ứng hiển thị nổi bật
-  - [ ] Thêm hiệu ứng đạn đặc biệt cho chiêu tuyệt chiêu
-  - [ ] Chết sẽ bị reset năng lượng
-
-- **Hạt năng lượng (Energy Orb)**
-  - [ ] Thêm hạt năng lượng mọc ngẫu nhiên trên bản đồ
-  - [ ] Mỗi hạt nhặt được tăng 1 điểm năng lượng
-  - [ ] Cứ 5s sẽ mọc 1 hạt mới 
-
----
-
-## 🧠 Góp ý Gameplay (Design & Balancing)
-
-### Them mục tiêu thắng/thua
-- [ ] Thêm **chế độ chơi có giới hạn thời gian** (vd: 2 phút).
-- [ ] Hoặc: Thêm **goal kill** (ai đạt 10 kill trước sẽ thắng).
-- [ ] Sau khi kết thúc, hiển thị "Game Over" + bảng xếp hạng.
-
-### 🧠 Bot AI chưa đủ khôn
-- [ ] Thêm logic tránh đạn (dựa vào vector đạn).
-- [ ] Nếu HP thấp → bot nên ưu tiên né.
-- [ ] Nếu không thấy player → bot di chuyển ngẫu nhiên theo pattern.
-
-### 🔫 Bắn cần balance thêm
-- [ ] Thêm **cooldown 500ms** giữa các lần bắn.
-- [ ] Giới hạn **tầm bay tối đa** của đạn (range).
-- [ ] Cân nhắc hiệu ứng “nảy” hoặc “dội” nhẹ nếu bắn vào vật cản (về sau).
-
-### ❤️ Máu & hồi máu
-- [ ] Thêm item hồi máu rơi ngẫu nhiên.
-- [ ] Cho phép regen sau khi không bị bắn 5 giây (optional).
-
-### 🏆 Leaderboard + Incentive
-- [ ] Highlight player dẫn đầu (hiệu ứng sáng, viền khác màu).
-- [ ] Tạo **cơ chế “bounty”**: giết người top sẽ +20 điểm.
-- [ ] Cảnh báo nếu có người vượt top (ping “new leader!”).
-
-### 💥 Ultimate Skill (Chiêu đặc biệt)
-- [ ] Đầy năng lượng → dùng ultimate: bắn 10 viên liên tục theo hình quạt.
-- [ ] Có **hiệu ứng charge-up** 1s trước khi xả đạn.
-- [ ] Reset năng lượng nếu chết.
-- [ ] Cho hiển thị "Ultimate Ready!" bằng hiệu ứng nổi bật.
-
-### 🧪 Replay Value / Progression
-- [ ] Thêm **level/EXP**: giết địch +exp → tăng cấp.
-- [ ] Level cao unlock hiệu ứng, màu dot, hoặc skin đặc biệt.
-- [ ] Cho phép chọn màu dot hoặc danh hiệu.
-
-### 🧩 Chế độ chơi về sau
-- [ ] Team Deathmatch (2 team: Red vs Blue)
-- [ ] King of the Hill (chiếm vùng trung tâm lâu nhất)
-- [ ] One Shot Mode (trúng là chết)
-- [ ] Turbo Mode (bắn cực nhanh trong 30s)
+### 5. UI/UX Polish & Khác
+- [ ] Màn hình game over
+- [ ] Tùy chỉnh tốc độ di chuyển, tốc độ đạn
+- [ ] Toggle sound effects
+- [ ] Thêm item hồi máu, regen máu
+- [ ] Highlight player dẫn đầu
+- [ ] Cơ chế "bounty": giết người top sẽ +20 điểm
+- [ ] Cảnh báo nếu có người vượt top
+- [ ] Thêm chế độ chơi mới (One Shot, Turbo, King of the Hill...)
 
 ---
