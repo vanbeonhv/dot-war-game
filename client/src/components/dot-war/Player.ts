@@ -13,7 +13,21 @@ export class Player {
 
   constructor(scene: Phaser.Scene, data: PlayerData) {
     this.scene = scene;
-    this.data = { ...data, score: data.score ?? 0, energy: data.energy ?? 0, maxEnergy: data.maxEnergy ?? 5 };
+    this.data = { 
+      ...data, 
+      score: data.score ?? 0, 
+      energy: data.energy ?? 0, 
+      maxEnergy: data.maxEnergy ?? 5,
+      // Khởi tạo power-up properties
+      speed: data.speed ?? 200,
+      fireRate: data.fireRate ?? 500,
+      damage: data.damage ?? 1,
+      speedBoostActive: false,
+      rapidFireActive: false,
+      shieldActive: false,
+      doubleDamageActive: false,
+      shieldHits: 0
+    };
     this.sprite = scene.add.circle(data.x, data.y, 20, Phaser.Display.Color.HexStringToColor(data.color).color);
     this.gun = scene.add.rectangle(data.x, data.y, 24, 6, 0xffffff, 1);
     this.gun.setOrigin(-0.1, 0.5); // Đầu mũi súng nhô ra ngoài
@@ -155,5 +169,50 @@ export class Player {
       duration: 120,
       onComplete: () => flash.destroy(),
     });
+  }
+
+  // Method để xử lý khi player bị hit (có shield)
+  takeDamage(): boolean {
+    // Nếu có shield active, sử dụng shield thay vì máu
+    if (this.data.shieldActive && this.data.shieldHits && this.data.shieldHits > 0) {
+      this.data.shieldHits--;
+      console.log(`Shield absorbed damage! ${this.data.shieldHits} hits remaining`);
+      
+      // Hiệu ứng shield hit
+      (this.sprite as any).setTint(0x70a1ff);
+      this.scene.tweens.add({
+        targets: this.sprite,
+        alpha: 0.5,
+        duration: 100,
+        yoyo: true,
+        onComplete: () => {
+          (this.sprite as any).clearTint();
+        }
+      });
+      
+      // Nếu hết shield hits, tắt shield
+      if (this.data.shieldHits <= 0) {
+        this.data.shieldActive = false;
+        if (this.data.shieldVisual) {
+          this.data.shieldVisual.destroy();
+          this.data.shieldVisual = undefined;
+        }
+        console.log('Shield broken!');
+      }
+      
+      return false; // Không bị mất máu
+    }
+    
+    // Bình thường, giảm máu
+    this.data.hp = Math.max(0, this.data.hp - 1);
+    this.drawHealthBar();
+    return true; // Bị mất máu
+  }
+
+  // Method để update shield visual position
+  updateShieldPosition() {
+    if (this.data.shieldVisual) {
+      this.data.shieldVisual.setPosition(this.data.x, this.data.y);
+    }
   }
 } 

@@ -46,12 +46,12 @@
 - [x] Đầy năng lượng (5/5) sẽ kích hoạt được ultimate: bắn liên tiếp 10 viên đạn theo hình quạt (spread shot ±45 độ quanh hướng chuột)
 - [x] Khi đầy năng lượng, player có hiệu ứng nổi bật (viền sáng, nhấp nháy, hoặc glow). Có thể thêm popup nhỏ "Ultimate Ready!" trên đầu player
 - [x] Đạn ultimate có hiệu ứng đặc biệt (màu khác, particle effect, tốc độ nhanh hơn)
-- [ ] Chết sẽ reset năng lượng về 0
-- [ ] Không thể tích lũy energy vượt quá 5
-- [ ] Chỉ dùng ultimate khi còn sống, không đang respawn
-- [ ] Không có cooldown cho ultimate (có thể dùng liên tục nếu đủ energy)
-- [ ] Ultimate chỉ bắn về hướng chuột, spread ±45 độ quanh hướng chuột
-- [ ] Âm thanh: Có hiệu ứng âm thanh khi kích hoạt ultimate
+- [x] Chết sẽ reset năng lượng về 0
+- [x] Không thể tích lũy energy vượt quá 5
+- [x] Chỉ dùng ultimate khi còn sống, không đang respawn
+- [x] Không có cooldown cho ultimate (có thể dùng liên tục nếu đủ energy)
+- [x] Ultimate chỉ bắn về hướng chuột, spread ±45 độ quanh hướng chuột
+- [x] Âm thanh: Có hiệu ứng âm thanh khi kích hoạt ultimate
 
 #### Hướng mở rộng về sau
 - [ ] Ultimate có thể có cooldown (ví dụ: 5 giây sau khi dùng mới được dùng tiếp)
@@ -62,7 +62,23 @@
 - [ ] Bot có thể tự động dùng ultimate khi đủ energy
 - [ ] Ultimate có thể phá vật cản hoặc xuyên qua nhiều đối thủ
 
-### 5. UI/UX Polish & Khác
+### 5. Power-ups System
+- [ ] Tạo cấu trúc dữ liệu PowerUp (id, type, x, y, sprite, duration, value)
+- [ ] Logic spawn power-up ngẫu nhiên trên map (không trên obstacle)
+- [ ] Logic nhặt power-up khi player đi qua
+- [ ] Health Pack: Hồi 1 máu (tối đa 3 máu), icon ❤️ màu đỏ
+- [ ] Energy Orb: +2 energy ngay lập tức, icon ⚡ màu vàng
+- [ ] Speed Boost: Tăng tốc độ di chuyển 50% trong 10 giây, icon ⚡ màu xanh
+- [ ] Rapid Fire: Giảm cooldown bắn 70% trong 15 giây, icon 🔥 màu cam
+- [ ] Shield: Bảo vệ 1 lần bị bắn, icon 🛡️ màu xanh
+- [ ] Double Damage: Đạn mạnh gấp đôi trong 20 giây, icon 💥 màu đỏ
+- [ ] Visual effects cho power-up (animation xoay, nhấp nháy)
+- [ ] Particle effects khi nhặt power-up
+- [ ] HUD hiển thị power-up đang active với timer
+- [ ] Power-up tự động biến mất sau 10 giây nếu không ai nhặt
+- [ ] Giới hạn tối đa 2-3 power-up trên map cùng lúc
+
+### 6. UI/UX Polish & Khác
 - [ ] Màn hình game over
 - [ ] Tùy chỉnh tốc độ di chuyển, tốc độ đạn
 - [ ] Toggle sound effects

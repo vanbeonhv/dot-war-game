@@ -1,7 +1,8 @@
 import Phaser from "phaser";
 import { Bullet } from "./Bullet";
 import { Player } from "./Player";
-import type { BulletData } from "./types";
+import { PowerUpManager } from "./PowerUpManager";
+import type { BulletData, PowerUpData } from "./types";
 
 const PLAYER_COLORS = ["#e63946", "#457b9d", "#f1faee", "#a8dadc", "#ffbe0b", "#8338ec", "#3a86ff"];
 const PLAYER_RADIUS = 20;
@@ -42,7 +43,6 @@ export default class GameScene extends Phaser.Scene {
   private bullets: Bullet[] = [];
   private respawnTimers: any[] = [];
   private respawnTexts: (Phaser.GameObjects.Text | null)[] = [];
-  private score: number = 0;
   private highScore: number = 0;
   private isPaused: boolean = false;
   private pauseMenu!: Phaser.GameObjects.Container;
@@ -54,6 +54,7 @@ export default class GameScene extends Phaser.Scene {
   private obstacles: Phaser.GameObjects.Rectangle[] = [];
   private youLineText?: Phaser.GameObjects.Text;
   private ultimateKey!: Phaser.Input.Keyboard.Key;
+  private powerUpManager!: PowerUpManager;
 
   constructor() {
     super({ key: "GameScene" });
@@ -62,8 +63,6 @@ export default class GameScene extends Phaser.Scene {
   preload() {}
 
   create() {
-    const width = 800;
-    const height = 600;
     this.highScore = parseInt(localStorage.getItem('dotWarHighScore') || '0');
     // Tạo danh sách player (player chính + fake player)
     this.players = [
@@ -90,8 +89,8 @@ export default class GameScene extends Phaser.Scene {
       })),
     ];
     this.respawnTimers = this.players.map(() => 0);
-    this.botMoveTimers = this.players.map((p, i) => (i === 0 ? 0 : Math.random() * 2000 + 1000));
-    this.botShootTimers = this.players.map((p, i) => (i === 0 ? 0 : Math.random() * 1500 + 800));
+    this.botMoveTimers = this.players.map((_, i) => (i === 0 ? 0 : Math.random() * 2000 + 1000));
+    this.botShootTimers = this.players.map((_, i) => (i === 0 ? 0 : Math.random() * 1500 + 800));
     this.cursors = this.input?.keyboard?.createCursorKeys() as Phaser.Types.Input.Keyboard.CursorKeys;
     this.wKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.W) as Phaser.Input.Keyboard.Key;
     this.aKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.A) as Phaser.Input.Keyboard.Key;
@@ -128,6 +127,9 @@ export default class GameScene extends Phaser.Scene {
       rect.setDepth(10);
       this.obstacles.push(rect);
     }
+    
+    // Khởi tạo PowerUpManager
+    this.powerUpManager = new PowerUpManager(this, this.isCollidingObstacle.bind(this));
   }
 
   createPauseMenu() {
@@ -294,6 +296,8 @@ export default class GameScene extends Phaser.Scene {
       }
       mainPlayer.data.energy = 0;
       mainPlayer.drawHealthBar();
+      // Hiệu ứng âm thanh/visual khi kích hoạt ultimate
+      this.createUltimateEffect(mainPlayer.data.x, mainPlayer.data.y);
     }
     // Bot hướng mũi súng về phía player chính
     for (let i = 1; i < this.players.length; i++) {
@@ -341,10 +345,15 @@ export default class GameScene extends Phaser.Scene {
         );
         if (distance < PLAYER_RADIUS + BULLET_RADIUS) {
           this.createHitEffect(player.data.x, player.data.y);
-          player.data.hp -= 1;
-          player.drawHealthBar();
-          if (player.data.hp <= 0) {
+          
+          // Sử dụng method handlePlayerHit mới
+          const wasDamaged = player.takeDamage();
+          
+          if (wasDamaged && player.data.hp <= 0) {
             player.setVisible(false);
+            // Reset energy về 0 khi chết
+            player.data.energy = 0;
+            player.drawHealthBar();
             // Tăng energy cho người bắn nếu không tự bắn mình
             if (bullet.data.ownerId !== player.data.id) {
               const shooter = this.players.find(p => p.data.id === bullet.data.ownerId);
@@ -422,6 +431,25 @@ export default class GameScene extends Phaser.Scene {
       }
     }
     this.updateLeaderboard();
+    
+    // Update PowerUpManager
+    this.powerUpManager.update(time, delta);
+    
+    // Kiểm tra va chạm player với power-up
+    if (this.respawnTimers[0] <= 0) { // Chỉ kiểm tra khi player còn sống
+      const collectedPowerUp = this.powerUpManager.checkPlayerCollision(
+        mainPlayer.data.x, 
+        mainPlayer.data.y, 
+        PLAYER_RADIUS
+      );
+      
+      if (collectedPowerUp) {
+        this.applyPowerUpEffect(collectedPowerUp);
+      }
+      
+      // Update shield position khi player di chuyển
+      mainPlayer.updateShieldPosition();
+    }
   }
 
   createHitEffect(x: number, y: number) {
@@ -491,6 +519,179 @@ export default class GameScene extends Phaser.Scene {
       };
       const bullet = new Bullet(this, bulletData);
       this.bullets.push(bullet);
+    }
+  }
+
+  createUltimateEffect(x: number, y: number) {
+    // Hiệu ứng visual thay thế âm thanh
+    const ultimateRing = this.add.circle(x, y, 50, 0x00cfff, 0.6);
+    this.tweens.add({
+      targets: ultimateRing,
+      scaleX: 3,
+      scaleY: 3,
+      alpha: 0,
+      duration: 800,
+      ease: 'Power2',
+      onComplete: () => {
+        ultimateRing.destroy();
+      }
+    });
+    // Flash effect
+    const flash = this.add.circle(x, y, 30, 0xffffff, 0.8);
+    this.tweens.add({
+      targets: flash,
+      scaleX: 2,
+      scaleY: 2,
+      alpha: 0,
+      duration: 300,
+      onComplete: () => {
+        flash.destroy();
+      }
+    });
+  }
+
+  applyPowerUpEffect(powerUpData: PowerUpData) {
+    const mainPlayer = this.players[0];
+    
+    switch (powerUpData.type) {
+      case 'health':
+        // Health Pack: Hồi 1 máu (tối đa 3 máu)
+        if (mainPlayer.data.hp < 3) {
+          mainPlayer.data.hp = Math.min(mainPlayer.data.hp + 1, 3);
+          mainPlayer.drawHealthBar();
+          console.log('Health Pack collected: +1 HP');
+        }
+        break;
+        
+      case 'energy':
+        // Energy Orb: +2 energy
+        if (typeof mainPlayer.data.energy === 'number' && typeof mainPlayer.data.maxEnergy === 'number') {
+          mainPlayer.data.energy = Math.min(mainPlayer.data.energy + 2, mainPlayer.data.maxEnergy);
+          mainPlayer.drawHealthBar();
+          console.log('Energy Orb collected: +2 Energy');
+        }
+        break;
+        
+      case 'speed':
+        // Speed Boost: Tăng tốc độ di chuyển trong 10 giây
+        if (!mainPlayer.data.speedBoostActive) {
+          mainPlayer.data.speedBoostActive = true;
+          mainPlayer.data.originalSpeed = mainPlayer.data.speed || 200;
+          mainPlayer.data.speed = mainPlayer.data.originalSpeed * 1.5; // Tăng 50%
+          
+          // Hiệu ứng visual
+          (mainPlayer.sprite as any).setTint(0x2ed573);
+          
+          // Timer để reset
+          setTimeout(() => {
+            if (mainPlayer.data.speedBoostActive) {
+              mainPlayer.data.speed = mainPlayer.data.originalSpeed;
+              mainPlayer.data.speedBoostActive = false;
+              (mainPlayer.sprite as any).clearTint();
+              console.log('Speed Boost expired');
+            }
+          }, 10000);
+          
+          console.log('Speed Boost activated: +50% speed for 10s');
+        }
+        break;
+        
+      case 'rapid':
+        // Rapid Fire: Tăng tốc độ bắn trong 8 giây
+        if (!mainPlayer.data.rapidFireActive) {
+          mainPlayer.data.rapidFireActive = true;
+          mainPlayer.data.originalFireRate = mainPlayer.data.fireRate || 500;
+          mainPlayer.data.fireRate = mainPlayer.data.originalFireRate * 0.4; // Giảm 60% cooldown
+          
+          // Hiệu ứng visual
+          (mainPlayer.sprite as any).setTint(0xffa502);
+          
+          // Timer để reset
+          setTimeout(() => {
+            if (mainPlayer.data.rapidFireActive) {
+              mainPlayer.data.fireRate = mainPlayer.data.originalFireRate;
+              mainPlayer.data.rapidFireActive = false;
+              (mainPlayer.sprite as any).clearTint();
+              console.log('Rapid Fire expired');
+            }
+          }, 8000);
+          
+          console.log('Rapid Fire activated: +150% fire rate for 8s');
+        }
+        break;
+        
+      case 'shield':
+        // Shield: Bảo vệ khỏi 1 hit trong 12 giây
+        if (!mainPlayer.data.shieldActive) {
+          mainPlayer.data.shieldActive = true;
+          mainPlayer.data.shieldHits = 1;
+          
+          // Hiệu ứng visual - tạo shield circle
+          const shieldCircle = this.add.circle(
+            mainPlayer.data.x, 
+            mainPlayer.data.y, 
+            PLAYER_RADIUS + 8, 
+            0x70a1ff, 
+            0.3
+          );
+          shieldCircle.setStrokeStyle(2, 0x5352ed);
+          mainPlayer.data.shieldVisual = shieldCircle;
+          
+          // Timer để reset
+          setTimeout(() => {
+            if (mainPlayer.data.shieldActive) {
+              mainPlayer.data.shieldActive = false;
+              mainPlayer.data.shieldHits = 0;
+              if (mainPlayer.data.shieldVisual) {
+                mainPlayer.data.shieldVisual.destroy();
+                mainPlayer.data.shieldVisual = undefined;
+              }
+              console.log('Shield expired');
+            }
+          }, 12000);
+          
+          console.log('Shield activated: 1 hit protection for 12s');
+        }
+        break;
+        
+      case 'damage':
+        // Double Damage: Tăng sát thương trong 15 giây
+        if (!mainPlayer.data.doubleDamageActive) {
+          mainPlayer.data.doubleDamageActive = true;
+          mainPlayer.data.originalDamage = mainPlayer.data.damage || 1;
+          mainPlayer.data.damage = mainPlayer.data.originalDamage * 2;
+          
+          // Hiệu ứng visual
+          (mainPlayer.sprite as any).setTint(0xff4757);
+          
+          // Timer để reset
+          setTimeout(() => {
+            if (mainPlayer.data.doubleDamageActive) {
+              mainPlayer.data.damage = mainPlayer.data.originalDamage;
+              mainPlayer.data.doubleDamageActive = false;
+              (mainPlayer.sprite as any).clearTint();
+              console.log('Double Damage expired');
+            }
+          }, 15000);
+          
+          console.log('Double Damage activated: 2x damage for 15s');
+        }
+        break;
+    }
+  }
+
+  // Cập nhật logic khi player bị hit bởi bullet
+  handlePlayerHit(playerIndex: number) {
+    const player = this.players[playerIndex];
+    const wasDamaged = player.takeDamage();
+    
+    if (wasDamaged) {
+      // Chỉ respawn nếu thực sự bị mất máu (không có shield)
+      if (player.data.hp <= 0) {
+        this.respawnTimers[playerIndex] = 3000;
+        player.setVisible(false);
+        player.setAlpha(0.5);
+      }
     }
   }
 } 
