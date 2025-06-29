@@ -27,11 +27,14 @@ jobs:
         with:
           node-version: 18
           cache: 'pnpm'
-          cache-dependency-path: client/pnpm-lock.yaml
+          # ✅ Đã sửa: dùng đúng đường dẫn lockfile trong working-directory
+          cache-dependency-path: ./client/pnpm-lock.yaml
+
+      - name: 🧪 Debug: Show files (optional)
+        run: ls -al
 
       - name: 📥 Install deps with pnpm
         run: pnpm install --frozen-lockfile
-        working-directory: ./client
 
       - name: 🏗 Build Vite app
         run: pnpm run build
