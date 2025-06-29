@@ -1,42 +1,31 @@
-name: Deploy Vite App to VPS
+name: deploy-client
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "client/**"
 
+defaults:
+  run:
+    working-directory: "client/"
+    
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./client
 
     steps:
       - name: ⬇ Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      - name: 🔧 Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
+      - name: 🔧 Install pnpm
+        run: npm install -g pnpm
 
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: 'pnpm'
-          # ✅ Đã sửa: dùng đúng đường dẫn lockfile trong working-directory
-          cache-dependency-path: ./client/pnpm-lock.yaml
+      - name: 📥 Install dependencies
+        run: pnpm install
 
-      - name: 🧪 Debug: Show files (optional)
-        run: ls -al
-
-      - name: 📥 Install deps with pnpm
-        run: pnpm install --frozen-lockfile
-
-      - name: 🏗 Build Vite app
+      - name: 🏗 Build
         run: pnpm run build
 
       - name: 📤 Upload dist/ to VPS
