@@ -63,22 +63,34 @@
 - [ ] Ultimate có thể phá vật cản hoặc xuyên qua nhiều đối thủ
 
 ### 5. Power-ups System
-- [ ] Tạo cấu trúc dữ liệu PowerUp (id, type, x, y, sprite, duration, value)
-- [ ] Logic spawn power-up ngẫu nhiên trên map (không trên obstacle)
-- [ ] Logic nhặt power-up khi player đi qua
-- [ ] Health Pack: Hồi 1 máu (tối đa 3 máu), icon ❤️ màu đỏ
-- [ ] Energy Orb: +2 energy ngay lập tức, icon ⚡ màu vàng
-- [ ] Speed Boost: Tăng tốc độ di chuyển 50% trong 10 giây, icon ⚡ màu xanh
-- [ ] Rapid Fire: Giảm cooldown bắn 70% trong 15 giây, icon 🔥 màu cam
-- [ ] Shield: Bảo vệ 1 lần bị bắn, icon 🛡️ màu xanh
-- [ ] Double Damage: Đạn mạnh gấp đôi trong 20 giây, icon 💥 màu đỏ
-- [ ] Visual effects cho power-up (animation xoay, nhấp nháy)
-- [ ] Particle effects khi nhặt power-up
+- [x] Tạo cấu trúc dữ liệu PowerUp (id, type, x, y, sprite, duration, value)
+- [x] Logic spawn power-up ngẫu nhiên trên map (không trên obstacle)
+- [x] Logic nhặt power-up khi player đi qua
+- [x] Health Pack: Hồi 1 máu (tối đa 3 máu), icon ❤️ màu đỏ
+- [x] Energy Orb: +2 energy ngay lập tức, icon ⚡ màu vàng
+- [x] Speed Boost: Tăng tốc độ di chuyển 50% trong 10 giây, icon 💨 màu xanh
+- [x] Rapid Fire: Giảm cooldown bắn 70% trong 8 giây, icon 🔥 màu cam
+- [x] Shield: Bảo vệ 1 lần bị bắn, icon 🛡️ màu xanh
+- [x] Double Damage: Đạn mạnh gấp đôi trong 15 giây, icon ⚔️ màu đỏ
+- [x] Visual effects cho power-up (animation xoay, nhấp nháy)
+- [x] Particle effects khi nhặt power-up
+- [x] Hiệu ứng nháy màu khi nhận power-up
+- [x] Hiệu ứng phụ động: gió cho speed, lửa động cho rapid
+- [ ] Hiệu ứng phụ động: tia sét/vòng năng lượng cho damage, tim đập cho health, tia điện cho energy
 - [ ] HUD hiển thị power-up đang active với timer
 - [ ] Power-up tự động biến mất sau 10 giây nếu không ai nhặt
 - [ ] Giới hạn tối đa 2-3 power-up trên map cùng lúc
 
-### 6. UI/UX Polish & Khác
+### 6. 🚀 UI/UX Polish & Định hướng tiếp theo
+- [ ] Thêm hiệu ứng phụ động cho các power-up còn lại (damage, health, energy)
+- [ ] Màn hình hướng dẫn phím điều khiển (ASWD, mũi tên, Q - 0 để ulti), bằng hình ảnh trực quan
+- [ ] Giảm tốc độ đan xuống, mình đang bắn nhanh quá
+- [ ] Quyết định lối chơi, chứ bắn hoài cũng ko hay. Ví dụ tạo map, bắn qua màn từ từ
+- [ ] HUD hiển thị power-up đang active và thời gian còn lại
+- [ ] Polish UI/UX: hiệu ứng, âm thanh, animation mượt mà hơn
+- [ ] Thêm chế độ chơi mới, nâng cấp AI bot
+- [ ] Tối ưu code, tách logic game và UI rõ ràng hơn
+- [ ] Thêm hướng dẫn chơi, màn hình game over, bảng xếp hạng
 - [ ] Màn hình game over
 - [ ] Tùy chỉnh tốc độ di chuyển, tốc độ đạn
 - [ ] Toggle sound effects
@@ -87,5 +99,3 @@
 - [ ] Cơ chế "bounty": giết người top sẽ +20 điểm
 - [ ] Cảnh báo nếu có người vượt top
 - [ ] Thêm chế độ chơi mới (One Shot, Turbo, King of the Hill...)
-
----
