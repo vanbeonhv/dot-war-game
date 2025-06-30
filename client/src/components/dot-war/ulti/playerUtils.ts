@@ -1,5 +1,5 @@
-import { PLAYER_RADIUS } from './constants';
-import type { Player } from './Player';
+import { PLAYER_RADIUS } from '../constants';
+import type { Player } from '../Player';
 
 export function respawnPlayer(
   players: Player[],

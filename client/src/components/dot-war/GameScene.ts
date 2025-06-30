@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { Bullet } from './Bullet';
-import { shootBotBullet } from './botUtils';
 import {
   BULLET_RADIUS,
   BULLET_SPEED,
@@ -10,12 +9,13 @@ import {
   PLAYER_SPEED,
   RESPAWN_TIME,
 } from './constants';
-import { createHitEffect, createUltimateEffect } from './effects';
 import { Player } from './Player';
 import { PowerUpManager } from './PowerUpManager';
-import { isCollidingObstacle, respawnPlayer, updateLeaderboard, updateScore } from './playerUtils';
-import { applyPowerUpEffect } from './powerUpEffects';
 import type { BulletData } from './types';
+import { shootBotBullet } from './ulti/botUtils';
+import { createHitEffect, createUltimateEffect } from './ulti/effects';
+import { isCollidingObstacle, respawnPlayer, updateLeaderboard, updateScore } from './ulti/playerUtils';
+import { applyPowerUpEffect } from './ulti/powerUpEffects';
 
 function getRandomPos(width: number, height: number) {
   return {
