@@ -1,9 +1,6 @@
-# 📊 Progress - Dot War Game (Single Player)
+# 📊 Progress - Dot War Game 2D (Single Player)
 
-## 🎯 Tổng quan
-- **Dự án:** Dot War - 2D Single Player Game
-- **Trạng thái:** Đang phát triển
-
+![game-play](assets/game-play.png)
 ---
 
 ## ✅ Checklist phát triển
