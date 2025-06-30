@@ -179,14 +179,19 @@ export class Player {
       console.log(`Shield absorbed damage! ${this.data.shieldHits} hits remaining`);
       
       // Hiệu ứng shield hit
-      (this.sprite as any).setTint(0x70a1ff);
+      const originalColor = Phaser.Display.Color.HexStringToColor(this.data.color).color;
+      this.sprite.setFillStyle(0x70a1ff);
       this.scene.tweens.add({
         targets: this.sprite,
         alpha: 0.5,
+        scaleX: 1.2,
+        scaleY: 1.2,
         duration: 100,
         yoyo: true,
         onComplete: () => {
-          (this.sprite as any).clearTint();
+          this.sprite.setFillStyle(originalColor);
+          this.sprite.setAlpha(1);
+          this.sprite.setScale(1, 1);
         }
       });
       

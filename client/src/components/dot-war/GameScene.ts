@@ -573,50 +573,64 @@ export default class GameScene extends Phaser.Scene {
         break;
         
       case 'speed':
-        // Speed Boost: Tăng tốc độ di chuyển trong 10 giây
         if (!mainPlayer.data.speedBoostActive) {
           mainPlayer.data.speedBoostActive = true;
           mainPlayer.data.originalSpeed = mainPlayer.data.speed || 200;
-          mainPlayer.data.speed = mainPlayer.data.originalSpeed * 1.5; // Tăng 50%
-          
-          // Hiệu ứng visual
-          (mainPlayer.sprite as any).setTint(0x2ed573);
-          
-          // Timer để reset
-          setTimeout(() => {
+          mainPlayer.data.speed = mainPlayer.data.originalSpeed * 1.5;
+          // Hiệu ứng nháy màu
+          const originalColor = Phaser.Display.Color.HexStringToColor(mainPlayer.data.color).color;
+          mainPlayer.sprite.setFillStyle(0x2ed573);
+          this.tweens.add({
+            targets: mainPlayer.sprite,
+            alpha: 0.5,
+            scaleX: 1.2,
+            scaleY: 1.2,
+            duration: 100,
+            yoyo: true,
+            onComplete: () => {
+              mainPlayer.sprite.setFillStyle(originalColor);
+              mainPlayer.sprite.setAlpha(1);
+              mainPlayer.sprite.setScale(1, 1);
+            }
+          });
+          this.time.delayedCall(10000, () => {
             if (mainPlayer.data.speedBoostActive) {
               mainPlayer.data.speed = mainPlayer.data.originalSpeed;
               mainPlayer.data.speedBoostActive = false;
-              (mainPlayer.sprite as any).clearTint();
-              console.log('Speed Boost expired');
+              mainPlayer.sprite.setFillStyle(originalColor);
             }
-          }, 10000);
-          
-          console.log('Speed Boost activated: +50% speed for 10s');
+          });
         }
         break;
         
       case 'rapid':
-        // Rapid Fire: Tăng tốc độ bắn trong 8 giây
         if (!mainPlayer.data.rapidFireActive) {
           mainPlayer.data.rapidFireActive = true;
           mainPlayer.data.originalFireRate = mainPlayer.data.fireRate || 500;
-          mainPlayer.data.fireRate = mainPlayer.data.originalFireRate * 0.4; // Giảm 60% cooldown
-          
-          // Hiệu ứng visual
-          (mainPlayer.sprite as any).setTint(0xffa502);
-          
-          // Timer để reset
-          setTimeout(() => {
+          mainPlayer.data.fireRate = mainPlayer.data.originalFireRate * 0.4;
+          // Hiệu ứng nháy màu
+          const originalColor = Phaser.Display.Color.HexStringToColor(mainPlayer.data.color).color;
+          mainPlayer.sprite.setFillStyle(0xffa502);
+          this.tweens.add({
+            targets: mainPlayer.sprite,
+            alpha: 0.5,
+            scaleX: 1.2,
+            scaleY: 1.2,
+            duration: 100,
+            yoyo: true,
+            onComplete: () => {
+              mainPlayer.sprite.setFillStyle(originalColor);
+              mainPlayer.sprite.setAlpha(1);
+              mainPlayer.sprite.setScale(1, 1);
+            }
+          });
+          this.time.delayedCall(8000, () => {
             if (mainPlayer.data.rapidFireActive) {
               mainPlayer.data.fireRate = mainPlayer.data.originalFireRate;
               mainPlayer.data.rapidFireActive = false;
-              (mainPlayer.sprite as any).clearTint();
-              console.log('Rapid Fire expired');
+              mainPlayer.sprite.setFillStyle(originalColor);
             }
-          }, 8000);
-          
-          console.log('Rapid Fire activated: +150% fire rate for 8s');
+          });
         }
         break;
         
@@ -655,26 +669,33 @@ export default class GameScene extends Phaser.Scene {
         break;
         
       case 'damage':
-        // Double Damage: Tăng sát thương trong 15 giây
         if (!mainPlayer.data.doubleDamageActive) {
           mainPlayer.data.doubleDamageActive = true;
           mainPlayer.data.originalDamage = mainPlayer.data.damage || 1;
           mainPlayer.data.damage = mainPlayer.data.originalDamage * 2;
-          
-          // Hiệu ứng visual
-          (mainPlayer.sprite as any).setTint(0xff4757);
-          
-          // Timer để reset
-          setTimeout(() => {
+          // Hiệu ứng nháy màu
+          const originalColor = Phaser.Display.Color.HexStringToColor(mainPlayer.data.color).color;
+          mainPlayer.sprite.setFillStyle(0xff4757);
+          this.tweens.add({
+            targets: mainPlayer.sprite,
+            alpha: 0.5,
+            scaleX: 1.2,
+            scaleY: 1.2,
+            duration: 100,
+            yoyo: true,
+            onComplete: () => {
+              mainPlayer.sprite.setFillStyle(originalColor);
+              mainPlayer.sprite.setAlpha(1);
+              mainPlayer.sprite.setScale(1, 1);
+            }
+          });
+          this.time.delayedCall(15000, () => {
             if (mainPlayer.data.doubleDamageActive) {
               mainPlayer.data.damage = mainPlayer.data.originalDamage;
               mainPlayer.data.doubleDamageActive = false;
-              (mainPlayer.sprite as any).clearTint();
-              console.log('Double Damage expired');
+              mainPlayer.sprite.setFillStyle(originalColor);
             }
-          }, 15000);
-          
-          console.log('Double Damage activated: 2x damage for 15s');
+          });
         }
         break;
     }
