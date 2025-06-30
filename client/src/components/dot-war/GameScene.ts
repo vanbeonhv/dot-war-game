@@ -593,12 +593,51 @@ export default class GameScene extends Phaser.Scene {
               mainPlayer.sprite.setScale(1, 1);
             }
           });
+          // Hiệu ứng phụ: gió phía sau player
+          const windParticles: Phaser.GameObjects.Arc[] = [];
+          const windInterval = this.time.addEvent({
+            delay: 80,
+            repeat: Math.floor(10000 / 80),
+            callback: () => {
+              // Xác định hướng di chuyển hiện tại (ưu tiên hướng phím bấm, nếu không thì random)
+              let dx = 0, dy = 0;
+              if (this.cursors.left.isDown || this.aKey.isDown) dx -= 1;
+              if (this.cursors.right.isDown || this.dKey.isDown) dx += 1;
+              if (this.cursors.up.isDown || this.wKey.isDown) dy -= 1;
+              if (this.cursors.down.isDown || this.sKey.isDown) dy += 1;
+              if (dx === 0 && dy === 0) {
+                // Nếu không di chuyển, random hướng nhẹ
+                const angle = Math.random() * Math.PI * 2;
+                dx = Math.cos(angle);
+                dy = Math.sin(angle);
+              }
+              // Vị trí xuất phát phía sau player
+              const px = mainPlayer.data.x - dx * 24 + (Math.random() - 0.5) * 10;
+              const py = mainPlayer.data.y - dy * 24 + (Math.random() - 0.5) * 10;
+              const wind = this.add.circle(px, py, 6 + Math.random() * 4, 0x90e0ef, 0.5);
+              wind.setDepth(2);
+              windParticles.push(wind);
+              // Tween bay ngược hướng di chuyển
+              this.tweens.add({
+                targets: wind,
+                x: px - dx * (20 + Math.random() * 10),
+                y: py - dy * (20 + Math.random() * 10),
+                alpha: 0,
+                scaleX: 1.5,
+                scaleY: 1.5,
+                duration: 400 + Math.random() * 200,
+                onComplete: () => wind.destroy()
+              });
+            }
+          });
           this.time.delayedCall(10000, () => {
             if (mainPlayer.data.speedBoostActive) {
               mainPlayer.data.speed = mainPlayer.data.originalSpeed;
               mainPlayer.data.speedBoostActive = false;
               mainPlayer.sprite.setFillStyle(originalColor);
             }
+            windInterval.remove(false);
+            windParticles.forEach(p => p.destroy());
           });
         }
         break;
@@ -624,12 +663,40 @@ export default class GameScene extends Phaser.Scene {
               mainPlayer.sprite.setScale(1, 1);
             }
           });
+          // Hiệu ứng phụ: lửa cháy động quanh player
+          const fireParticles: Phaser.GameObjects.Arc[] = [];
+          const fireInterval = this.time.addEvent({
+            delay: 60,
+            repeat: Math.floor(8000 / 60),
+            callback: () => {
+              const angle = Math.random() * Math.PI * 2;
+              const r = 22 + Math.random() * 6;
+              const px = mainPlayer.data.x + Math.cos(angle) * r;
+              const py = mainPlayer.data.y + Math.sin(angle) * r;
+              const color = Math.random() > 0.5 ? 0xffa502 : 0xff6348;
+              // Circle nhỏ hình ngọn lửa
+              const fire = this.add.circle(px, py, 6 + Math.random() * 3, color, 0.85);
+              fire.setScale(0.6 + Math.random() * 0.3, 1.2 + Math.random() * 0.5);
+              fire.setDepth(4);
+              fireParticles.push(fire);
+              this.tweens.add({
+                targets: fire,
+                scaleY: 2.2 + Math.random(),
+                scaleX: 0.7 + Math.random() * 0.5,
+                alpha: 0,
+                duration: 320 + Math.random() * 120,
+                onComplete: () => fire.destroy()
+              });
+            }
+          });
           this.time.delayedCall(8000, () => {
             if (mainPlayer.data.rapidFireActive) {
               mainPlayer.data.fireRate = mainPlayer.data.originalFireRate;
               mainPlayer.data.rapidFireActive = false;
               mainPlayer.sprite.setFillStyle(originalColor);
             }
+            fireInterval.remove(false);
+            fireParticles.forEach(p => p.destroy());
           });
         }
         break;
