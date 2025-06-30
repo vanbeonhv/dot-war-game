@@ -1,10 +1,14 @@
 # 📊 Progress - Dot War Game 2D (Single Player)
 
-## 🎮 Demo Video
+## 🎮 Demo
 
-[![🎬 Click to watch demo video](assets/game-play.png)](assets/demo1.mp4)
+![game-play](assets/game-play.png)
 
-*Click vào ảnh trên để xem video demo gameplay*
+https://github.com/user-attachments/assets/fb9f12e2-c85d-48ca-8bfd-23c6451200fe
+
+
+
+
 
 ---
 
