@@ -89,7 +89,7 @@
 
 ### 6. 🚀 UI/UX Polish & Định hướng tiếp theo
 - [ ] Thêm hiệu ứng phụ động cho các power-up còn lại (damage, health, energy)
-- [ ] Màn hình hướng dẫn phím điều khiển (ASWD, mũi tên, Q - 0 để ulti), bằng hình ảnh trực quan
+- [ ] Màn hình hướng dẫn phím điều khiển (ASWD, mũi tên, Space - 0 để ulti), bằng hình ảnh trực quan
 - [ ] Giảm tốc độ đan xuống, mình đang bắn nhanh quá
 - [ ] Quyết định lối chơi, chứ bắn hoài cũng ko hay. Ví dụ tạo map, bắn qua màn từ từ
 - [ ] HUD hiển thị power-up đang active và thời gian còn lại
