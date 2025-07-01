@@ -17,25 +17,77 @@ import { createHitEffect, createUltimateEffect } from './ulti/effects';
 import { isCollidingObstacle, respawnPlayer, updateLeaderboard, updateScore } from './ulti/playerUtils';
 import { applyPowerUpEffect } from './ulti/powerUpEffects';
 
-function getRandomPos(width: number, height: number) {
+function _getRandomPos(width: number, height: number) {
   return {
     x: Math.random() * (width - 2 * PLAYER_RADIUS) + PLAYER_RADIUS,
     y: Math.random() * (height - 2 * PLAYER_RADIUS) + PLAYER_RADIUS,
   };
 }
 
-function getSafeRandomPos(obstacles: Phaser.GameObjects.Rectangle[], radius: number) {
-  let pos: { x: number; y: number };
-  let tries = 0;
-  do {
-    pos = getRandomPos(800, 600);
-    tries++;
-    if (!isCollidingObstacle(obstacles, pos.x, pos.y, radius)) {
-      return pos;
+function _getSafeRandomPos(obstacles: Phaser.GameObjects.Rectangle[], radius: number) {
+  // Tạo lưới các vị trí có thể
+  const gridSize = radius * 4;
+  const cols = Math.floor(800 / gridSize);
+  const rows = Math.floor(600 / gridSize);
+  const positions = [];
+
+  // Thu thập tất cả vị trí có thể
+  for (let col = 0; col < cols; col++) {
+    for (let row = 0; row < rows; row++) {
+      const x = (col + 0.5) * gridSize;
+      const y = (row + 0.5) * gridSize;
+
+      // Kiểm tra khoảng cách đến biên map
+      if (x < radius * 3 || x > 800 - radius * 3 || y < radius * 3 || y > 600 - radius * 3) {
+        continue;
+      }
+
+      // Kiểm tra va chạm với obstacles
+      if (!isCollidingObstacle(obstacles, x, y, radius)) {
+        positions.push({ x, y });
+      }
     }
-  } while (tries < 200);
-  // Nếu thử 200 lần vẫn không được, trả về giữa map
-  return { x: 400, y: 300 };
+  }
+
+  // Nếu có vị trí an toàn, chọn ngẫu nhiên một trong số đó
+  if (positions.length > 0) {
+    const randomIndex = Math.floor(Math.random() * positions.length);
+    return positions[randomIndex];
+  }
+
+  // Nếu không tìm được vị trí an toàn trong lưới, thử random
+  const maxRandomTries = 100;
+  for (let i = 0; i < maxRandomTries; i++) {
+    const x = radius * 3 + Math.random() * (800 - radius * 6);
+    const y = radius * 3 + Math.random() * (600 - radius * 6);
+    if (!isCollidingObstacle(obstacles, x, y, radius)) {
+      return { x, y };
+    }
+  }
+
+  // Fallback: tìm điểm xa obstacles nhất
+  let bestPos = { x: 400, y: 300 };
+  let maxMinDistance = 0;
+
+  for (let i = 0; i < 20; i++) {
+    const x = radius * 3 + Math.random() * (800 - radius * 6);
+    const y = radius * 3 + Math.random() * (600 - radius * 6);
+
+    let minDistance = Number.MAX_VALUE;
+    for (const obstacle of obstacles) {
+      const dx = x - obstacle.x;
+      const dy = y - obstacle.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      minDistance = Math.min(minDistance, distance);
+    }
+
+    if (minDistance > maxMinDistance) {
+      maxMinDistance = minDistance;
+      bestPos = { x, y };
+    }
+  }
+
+  return bestPos;
 }
 
 export default class GameScene extends Phaser.Scene {
@@ -60,6 +112,44 @@ export default class GameScene extends Phaser.Scene {
   private youLineText?: Phaser.GameObjects.Text;
   private ultimateKey!: Phaser.Input.Keyboard.Key;
   private powerUpManager!: PowerUpManager;
+  private getRandomSpawnPoint() {
+    const margin = PLAYER_RADIUS * 2; // Giảm margin để tăng phạm vi di chuyển
+    let maxTries = 50;
+
+    while (maxTries > 0) {
+      const x = margin + Math.random() * (800 - margin * 2);
+      const y = margin + Math.random() * (600 - margin * 2);
+
+      if (!isCollidingObstacle(this.obstacles, x, y, PLAYER_RADIUS * 2)) {
+        return { x, y };
+      }
+      maxTries--;
+    }
+
+    // Fallback: tìm điểm xa obstacles nhất
+    let bestPos = { x: 400, y: 300 };
+    let maxMinDistance = 0;
+
+    for (let i = 0; i < 20; i++) {
+      const x = margin + Math.random() * (800 - margin * 2);
+      const y = margin + Math.random() * (600 - margin * 2);
+
+      let minDistance = Number.MAX_VALUE;
+      for (const obstacle of this.obstacles) {
+        const dx = x - obstacle.x;
+        const dy = y - obstacle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        minDistance = Math.min(minDistance, distance);
+      }
+
+      if (minDistance > maxMinDistance) {
+        maxMinDistance = minDistance;
+        bestPos = { x, y };
+      }
+    }
+
+    return bestPos;
+  }
 
   constructor() {
     super({ key: 'GameScene' });
@@ -69,36 +159,8 @@ export default class GameScene extends Phaser.Scene {
 
   create() {
     this.highScore = parseInt(localStorage.getItem('dotWarHighScore') || '0');
-    // Tạo danh sách player (player chính + fake player)
-    this.players = [
-      new Player(this, {
-        id: 'me',
-        ...getSafeRandomPos(this.obstacles, PLAYER_RADIUS),
-        color: PLAYER_COLORS[0],
-        isMain: true,
-        hp: 3,
-        score: 0,
-        energy: 0,
-        maxEnergy: 5,
-      }),
-      ...Array.from({ length: NUM_FAKE_PLAYERS }).map(
-        (_, i) =>
-          new Player(this, {
-            id: `bot_${i}`,
-            name: `bot_${i}`,
-            ...getSafeRandomPos(this.obstacles, PLAYER_RADIUS),
-            color: PLAYER_COLORS[(i + 1) % PLAYER_COLORS.length],
-            isMain: false,
-            hp: 3,
-            score: 0,
-            energy: 0,
-            maxEnergy: 5,
-          })
-      ),
-    ];
-    this.respawnTimers = this.players.map(() => 0);
-    this.botMoveTimers = this.players.map((_, i) => (i === 0 ? 0 : Math.random() * 2000 + 1000));
-    this.botShootTimers = this.players.map((_, i) => (i === 0 ? 0 : Math.random() * 1500 + 800));
+
+    // Khởi tạo các thông số khác trước
     this.cursors = this.input?.keyboard?.createCursorKeys() as Phaser.Types.Input.Keyboard.CursorKeys;
     this.wKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.W) as Phaser.Input.Keyboard.Key;
     this.aKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.A) as Phaser.Input.Keyboard.Key;
@@ -106,11 +168,7 @@ export default class GameScene extends Phaser.Scene {
     this.dKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.D) as Phaser.Input.Keyboard.Key;
     this.pauseKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC) as Phaser.Input.Keyboard.Key;
     this.ultimateKey = this.input?.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.Q) as Phaser.Input.Keyboard.Key;
-    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      if (!this.isPaused && this.respawnTimers[0] <= 0) {
-        this.shootBullet(pointer.x, pointer.y);
-      }
-    });
+
     this.createPauseMenu();
     this.leaderboardText = this.add.text(600, 20, '', {
       font: '20px Arial',
@@ -123,17 +181,130 @@ export default class GameScene extends Phaser.Scene {
       rich: true,
     });
     this.leaderboardText.setDepth(100);
-    // Sinh ngẫu nhiên vật cản
+
+    // Tạo obstacles với kích thước vừa phải và đảm bảo ít nhất 4 cái
     this.obstacles = [];
-    const numObstacles = 5;
-    for (let i = 0; i < numObstacles; i++) {
-      const w = 60 + Math.random() * 60;
-      const h = 40 + Math.random() * 40;
-      const x = 100 + Math.random() * (800 - 200);
-      const y = 100 + Math.random() * (600 - 200);
-      const rect = this.add.rectangle(x, y, w, h, 0x444444, 1).setStrokeStyle(2, 0xffffff, 0.7);
-      rect.setDepth(10);
+    const minSize = 60;
+    const maxSize = 100;
+
+    // Chia map thành các vùng nhỏ hơn để đảm bảo đủ chỗ
+    const zones = [
+      { x1: 100, y1: 100, x2: 250, y2: 250 },
+      { x1: 550, y1: 100, x2: 700, y2: 250 },
+      { x1: 100, y1: 350, x2: 250, y2: 500 },
+      { x1: 550, y1: 350, x2: 700, y2: 500 },
+      { x1: 300, y1: 200, x2: 500, y2: 400 },
+    ];
+
+    // Đầu tiên đặt 4 obstacles ở 4 vùng đầu tiên
+    for (let i = 0; i < 4; i++) {
+      const zone = zones[i];
+      const w = minSize + Math.random() * (maxSize - minSize);
+      const h = minSize + Math.random() * (maxSize - minSize);
+
+      const x = zone.x1 + (zone.x2 - zone.x1 - w) / 2;
+      const y = zone.y1 + (zone.y2 - zone.y1 - h) / 2;
+
+      const rect = this.add.rectangle(x, y, w, h, 0x444444, 1).setStrokeStyle(2, 0xffffff, 0.7).setDepth(10);
       this.obstacles.push(rect);
+    }
+
+    // Thêm 1-2 obstacles nữa nếu còn chỗ
+    const extraObstacles = Math.floor(Math.random() * 2);
+    if (extraObstacles > 0 && zones.length > 4) {
+      const zone = zones[4];
+      const w = minSize + Math.random() * (maxSize - minSize);
+      const h = minSize + Math.random() * (maxSize - minSize);
+
+      const x = zone.x1 + (zone.x2 - zone.x1 - w) / 2;
+      const y = zone.y1 + (zone.y2 - zone.y1 - h) / 2;
+
+      const rect = this.add.rectangle(x, y, w, h, 0x444444, 1).setStrokeStyle(2, 0xffffff, 0.7).setDepth(10);
+      this.obstacles.push(rect);
+    }
+
+    // Tạo vị trí spawn ngẫu nhiên cho player chính
+    const mainSpawnPoint = this.getRandomSpawnPoint();
+
+    // Tạo players với vị trí spawn đã định sẵn
+    this.players = [
+      new Player(this, {
+        id: 'me',
+        x: mainSpawnPoint.x,
+        y: mainSpawnPoint.y,
+        color: PLAYER_COLORS[0],
+        isMain: true,
+        hp: 3,
+        score: 0,
+        energy: 0,
+        maxEnergy: 5,
+      }),
+      ...Array.from({ length: NUM_FAKE_PLAYERS }).map((_, i) => {
+        // Tạo vị trí spawn ngẫu nhiên cho mỗi bot
+        const botSpawnPoint = this.getRandomSpawnPoint();
+        return new Player(this, {
+          id: `bot_${i}`,
+          name: `bot_${i}`,
+          x: botSpawnPoint.x,
+          y: botSpawnPoint.y,
+          color: PLAYER_COLORS[(i + 1) % PLAYER_COLORS.length],
+          isMain: false,
+          hp: 3,
+          score: 0,
+          energy: 0,
+          maxEnergy: 5,
+        });
+      }),
+    ];
+    this.respawnTimers = this.players.map(() => 0);
+    this.botMoveTimers = this.players.map((_, i) => (i === 0 ? 0 : Math.random() * 2000 + 1000));
+    this.botShootTimers = this.players.map((_, i) => (i === 0 ? 0 : Math.random() * 1500 + 800));
+
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      if (!this.isPaused && this.respawnTimers[0] <= 0) {
+        this.shootBullet(pointer.x, pointer.y);
+      }
+    });
+
+    function _isObstacleOverlapping(
+      centerX: number,
+      centerY: number,
+      w: number,
+      h: number,
+      obstacles: Phaser.GameObjects.Rectangle[]
+    ): boolean {
+      const safeGap = PLAYER_RADIUS * 1.2;
+
+      // Kiểm tra nếu quá gần biên map
+      const mapMargin = PLAYER_RADIUS * 3;
+      if (
+        centerX - w / 2 < mapMargin ||
+        centerX + w / 2 > 800 - mapMargin ||
+        centerY - h / 2 < mapMargin ||
+        centerY + h / 2 > 600 - mapMargin
+      ) {
+        return true;
+      }
+
+      // Tính vùng bao của obstacle mới
+      const x1 = centerX - w / 2 - safeGap;
+      const x2 = centerX + w / 2 + safeGap;
+      const y1 = centerY - h / 2 - safeGap;
+      const y2 = centerY + h / 2 + safeGap;
+
+      // Kiểm tra va chạm với các obstacles hiện có
+      for (const obstacle of obstacles) {
+        const ox1 = obstacle.x - obstacle.width / 2;
+        const ox2 = obstacle.x + obstacle.width / 2;
+        const oy1 = obstacle.y - obstacle.height / 2;
+        const oy2 = obstacle.y + obstacle.height / 2;
+
+        // Kiểm tra chồng lấn giữa hai vùng bao
+        if (!(x2 < ox1 - safeGap || x1 > ox2 + safeGap || y2 < oy1 - safeGap || y1 > oy2 + safeGap)) {
+          return true;
+        }
+      }
+      return false;
     }
 
     // Khởi tạo PowerUpManager
@@ -353,9 +524,9 @@ export default class GameScene extends Phaser.Scene {
           this.respawnTexts[i]?.setText(secondsLeft.toString());
         }
         if (this.respawnTimers[i] <= 0) {
-          respawnPlayer(this.players, this.respawnTimers, this.respawnTexts, this.tweens, i, (radius) =>
-            getSafeRandomPos(this.obstacles, radius)
-          );
+          // Tạo vị trí spawn ngẫu nhiên khi respawn
+          const spawnPoint = this.getRandomSpawnPoint();
+          respawnPlayer(this.players, this.respawnTimers, this.respawnTexts, this.tweens, i, () => spawnPoint);
         }
       }
     }

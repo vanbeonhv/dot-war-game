@@ -77,21 +77,38 @@ export function updateLeaderboard(
 }
 
 export function isCollidingObstacle(obstacles: Phaser.GameObjects.Rectangle[], x: number, y: number, radius: number) {
-  for (const obs of obstacles) {
-    const rx = obs.x;
-    const ry = obs.y;
-    const rw = obs.width!;
-    const rh = obs.height!;
-    // Kiểm tra va chạm hình tròn (player) với hình chữ nhật (obstacle)
-    const dx = Math.abs(x - rx);
-    const dy = Math.abs(y - ry);
-    if (dx > rw / 2 + radius) continue;
-    if (dy > rh / 2 + radius) continue;
-    if (dx <= rw / 2) return true;
-    if (dy <= rh / 2) return true;
-    const cornerDist = (dx - rw / 2) ** 2 + (dy - rh / 2) ** 2;
-    if (cornerDist <= radius * radius) return true;
+  // Kiểm tra biên map với margin nhỏ hơn
+  const mapMargin = radius * 1.2;
+  if (
+    x - radius < mapMargin ||
+    x + radius > 800 - mapMargin ||
+    y - radius < mapMargin ||
+    y + radius > 600 - mapMargin
+  ) {
+    return true;
   }
+
+  // Kiểm tra va chạm với từng obstacle
+  for (const obstacle of obstacles) {
+    const rectX = obstacle.x;
+    const rectY = obstacle.y;
+    const rectW = obstacle.width;
+    const rectH = obstacle.height;
+
+    // Tìm điểm gần nhất trên obstacle với điểm cần kiểm tra
+    const closestX = Math.max(rectX - rectW / 2, Math.min(x, rectX + rectW / 2));
+    const closestY = Math.max(rectY - rectH / 2, Math.min(y, rectY + rectH / 2));
+
+    // Tính khoảng cách từ điểm gần nhất đến điểm cần kiểm tra
+    const distX = x - closestX;
+    const distY = y - closestY;
+
+    // Kiểm tra va chạm với khoảng cách thực tế
+    if (distX * distX + distY * distY < radius * radius) {
+      return true;
+    }
+  }
+
   return false;
 }
 
