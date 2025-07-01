@@ -4,22 +4,24 @@
 
 ![game-play](assets/game-play.png)
 
-https://github.com/user-attachments/assets/fb9f12e2-c85d-48ca-8bfd-23c6451200fe
+![](https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65)
 
-
-
-
+<video width="320" height="240" controls>
+  <source src="assets/demo1.mp4" type="video/mp4">
+</video>
 
 ---
 
 ## ✅ Checklist phát triển
 
 ### 1. Khởi tạo & Cơ bản
+
 - [x] Scaffold React + Vite + Tailwind
 - [x] Cài đặt Phaser 3
 - [x] Tích hợp canvas game vào React (GameCanvas)
 
 ### 2. Gameplay Core
+
 - [x] Player di chuyển bằng WASD
 - [x] Bắn đạn bằng chuột
 - [x] Đạn va chạm player (chết, respawn)
@@ -33,6 +35,7 @@ https://github.com/user-attachments/assets/fb9f12e2-c85d-48ca-8bfd-23c6451200fe
 - [x] Vật cản (obstacle) random trên bản đồ, không thể đi/bắn xuyên qua
 
 ### 3. Nâng cao & Polish
+
 - [x] Hiệu ứng đạn nổ, particle, flash, explosion
 - [x] Hiệu ứng respawn (fade in/out, countdown)
 - [x] Hiệu ứng di chuyển mượt mà hơn (trail effect cho đạn)
@@ -47,6 +50,7 @@ https://github.com/user-attachments/assets/fb9f12e2-c85d-48ca-8bfd-23c6451200fe
 - [x] Cộng điểm khi bắn chết bot
 
 ### 4. Ultimate Skill (Tuyệt chiêu)
+
 - [x] Thêm thanh năng lượng (energy bar) cho mỗi nhân vật, tối đa 5 điểm
 - [x] Tiêu diệt 1 địch được +1 energy (không tăng khi tự sát hoặc đối thủ chết do nguyên nhân khác)
 - [x] Đầy năng lượng (5/5) sẽ kích hoạt được ultimate: bắn liên tiếp 10 viên đạn theo hình quạt (spread shot ±45 độ quanh hướng chuột)
@@ -60,6 +64,7 @@ https://github.com/user-attachments/assets/fb9f12e2-c85d-48ca-8bfd-23c6451200fe
 - [x] Âm thanh: Có hiệu ứng âm thanh khi kích hoạt ultimate
 
 #### Hướng mở rộng về sau
+
 - [ ] Ultimate có thể có cooldown (ví dụ: 5 giây sau khi dùng mới được dùng tiếp)
 - [ ] Ultimate có thể gây hiệu ứng đặc biệt lên đối thủ (làm chậm, choáng, v.v.)
 - [ ] Có thể nâng cấp ultimate (bắn nhiều viên hơn, damage cao hơn, hiệu ứng đẹp hơn)
@@ -69,6 +74,7 @@ https://github.com/user-attachments/assets/fb9f12e2-c85d-48ca-8bfd-23c6451200fe
 - [ ] Ultimate có thể phá vật cản hoặc xuyên qua nhiều đối thủ
 
 ### 5. Power-ups System
+
 - [x] Tạo cấu trúc dữ liệu PowerUp (id, type, x, y, sprite, duration, value)
 - [x] Logic spawn power-up ngẫu nhiên trên map (không trên obstacle)
 - [x] Logic nhặt power-up khi player đi qua
@@ -88,8 +94,9 @@ https://github.com/user-attachments/assets/fb9f12e2-c85d-48ca-8bfd-23c6451200fe
 - [ ] Giới hạn tối đa 2-3 power-up trên map cùng lúc
 
 ### 6. 🚀 UI/UX Polish & Định hướng tiếp theo
+
 - [ ] Thêm hiệu ứng phụ động cho các power-up còn lại (damage, health, energy)
-- [ ] Màn hình hướng dẫn phím điều khiển (ASWD, mũi tên, Q - 0 để ulti), bằng hình ảnh trực quan
+- [x] Màn hình hướng dẫn phím điều khiển (ASWD, và Space để ulti), bằng hình ảnh trực quan
 - [ ] Giảm tốc độ đan xuống, mình đang bắn nhanh quá
 - [ ] Quyết định lối chơi, chứ bắn hoài cũng ko hay. Ví dụ tạo map, bắn qua màn từ từ
 - [ ] HUD hiển thị power-up đang active và thời gian còn lại
