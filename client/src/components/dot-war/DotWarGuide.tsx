@@ -46,8 +46,8 @@ const DotWarGuide: React.FC<DotWarGuideProps> = ({ onBack }) => {
                 <div className='flex-1 h-10 border-2 border-cyan-400 bg-cyan-400/40 rounded-md flex items-center justify-center text-sm font-semibold shadow-lg cursor-pointer hover:bg-cyan-400/50 transition-all active:scale-95'>
                   Trái
                 </div>
-                <div className='flex-1 h-10 border-2 border-cyan-400/30 bg-gray-800/30 rounded-md flex items-center justify-center text-sm font-semibold text-cyan-300/50'>
-                  Phải
+                <div className='flex-1 h-10 border border-cyan-400/10 bg-gray-800/10 rounded-md flex items-center justify-center text-sm font-semibold text-cyan-300/20'>
+                  <span className='opacity-50'>Phải</span>
                 </div>
               </div>
               <div className='w-20 h-24 border-2 border-cyan-400 rounded-2xl bg-gray-800/50 relative'>
