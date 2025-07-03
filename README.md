@@ -1,14 +1,10 @@
 # 📊 Progress - Dot War Game 2D (Single Player)
-
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/vanbeonhv/dot-war-game?utm_source=oss&utm_medium=github&utm_campaign=vanbeonhv%2Fdot-war-game&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 ## 🎮 Demo
 
 ![game-play](assets/game-play.png)
 
-![](https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65)
-
-<video width="320" height="240" controls>
-  <source src="assets/demo1.mp4" type="video/mp4">
-</video>
+https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65
 
 ---
 
