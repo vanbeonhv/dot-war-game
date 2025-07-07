@@ -10,6 +10,7 @@ export interface PlayerData {
   _moveDir?: { x: number; y: number };
   energy?: number;
   maxEnergy?: number;
+  maxHp?: number;
   // Power-up related properties
   speed?: number;
   fireRate?: number;

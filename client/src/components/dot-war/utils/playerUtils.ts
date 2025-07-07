@@ -14,7 +14,8 @@ export function respawnPlayer(
   player.data.x = newPos.x;
   player.data.y = newPos.y;
   player.setPosition(newPos.x, newPos.y);
-  player.data.hp = 3;
+  player.data.hp = player.data.isMain ? 5 : 3;
+  player.data.maxHp = player.data.isMain ? 5 : 3;
   player.setAlpha(0);
   tweens.add({
     targets: [player.sprite, player.gun, player.nameText, player.healthBar],

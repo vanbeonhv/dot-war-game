@@ -121,8 +121,8 @@ export class BulletManager {
 
               // Hồi máu cho player chính
               const mainPlayer = players[0];
-              if (mainPlayer.data.hp < 3) {
-                mainPlayer.data.hp = Math.min(3, mainPlayer.data.hp + 1);
+              if (mainPlayer.data.hp < 5) {
+                mainPlayer.data.hp = Math.min(5, mainPlayer.data.hp + 1);
                 mainPlayer.drawHealthBar();
               }
 

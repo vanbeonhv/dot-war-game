@@ -7,8 +7,8 @@ export const RESPAWN_TIME = 3000;
 export const NUM_FAKE_PLAYERS = 5;
 
 // Wave System Constants
-export const INITIAL_BOT_COUNT = 3; // Bots at wave 1
-export const BOT_INCREASE_PER_WAVE = 2; // Additional bots per wave
+export const INITIAL_BOT_COUNT = 2; // Bots at wave 1
+export const BOT_INCREASE_PER_WAVE = 1; // Additional bots per wave
 export const MAX_BOTS_ON_SCREEN = 15; // Maximum bots allowed
 export const WAVE_BREAK_TIME = 3 * 1000; // 3 seconds break between waves
 

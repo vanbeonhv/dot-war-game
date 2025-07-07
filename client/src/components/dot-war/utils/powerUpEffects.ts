@@ -16,8 +16,8 @@ export function applyPowerUpEffect(
 ) {
   switch (powerUpData.type) {
     case 'health':
-      if (mainPlayer.data.hp < 3) {
-        mainPlayer.data.hp = Math.min(mainPlayer.data.hp + 1, 3);
+      if (mainPlayer.data.hp < (mainPlayer.data.maxHp ?? 5)) {
+        mainPlayer.data.hp = Math.min(mainPlayer.data.hp + 1, mainPlayer.data.maxHp ?? 5);
         mainPlayer.drawHealthBar();
         console.log('Health Pack collected: +1 HP');
       }

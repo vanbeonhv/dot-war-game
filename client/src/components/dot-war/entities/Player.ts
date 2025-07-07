@@ -27,6 +27,7 @@ export class Player {
       shieldActive: false,
       doubleDamageActive: false,
       shieldHits: 0,
+      maxHp: data.maxHp ?? (data.isMain ? 5 : 3),
     };
     this.sprite = scene.add.circle(data.x, data.y, 20, Phaser.Display.Color.HexStringToColor(data.color).color);
     this.gun = scene.add.rectangle(data.x, data.y, 24, 6, 0xffffff, 1);
@@ -104,7 +105,7 @@ export class Player {
     this.healthBar.fillStyle(0x333333, 1);
     this.healthBar.fillRect(x, y, barWidth, barHeight);
     // HP
-    const hpPercent = Math.max(0, this.data.hp) / 3;
+    const hpPercent = Math.max(0, this.data.hp) / (this.data.maxHp ?? 5);
     this.healthBar.fillStyle(0x00ff00, 1);
     this.healthBar.fillRect(x, y, barWidth * hpPercent, barHeight);
     // Border máu

@@ -48,7 +48,8 @@ export class PlayerManager {
         y: mainSpawnPoint.y,
         color: PLAYER_COLORS[0],
         isMain: true,
-        hp: 3,
+        hp: 5,
+        maxHp: 5,
         score: 0,
         energy: 0,
         maxEnergy: 5,
@@ -124,6 +125,7 @@ export class PlayerManager {
       color: PLAYER_COLORS[colorIndex],
       isMain: false,
       hp: 3,
+      maxHp: 3,
       score: 0,
       energy: 0,
       maxEnergy: 5,
@@ -152,6 +154,12 @@ export class PlayerManager {
   }
 
   public onWaveStart() {
+    // Heal and increase max HP for main player after each wave
+    const mainPlayer = this.getMainPlayer();
+    if (mainPlayer.data.maxHp == null) mainPlayer.data.maxHp = 5;
+    mainPlayer.data.maxHp += 1;
+    mainPlayer.data.hp = Math.min(mainPlayer.data.hp + 1, mainPlayer.data.maxHp);
+    mainPlayer.drawHealthBar();
     // Spawn bots cho wave mới
     this.spawnWaveBots();
   }

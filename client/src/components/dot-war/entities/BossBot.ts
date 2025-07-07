@@ -110,7 +110,7 @@ export class BossBot extends Player {
 
     // Bắn thường về phía player chính
     this.shootTimer -= delta;
-    if (this.shootTimer <= 0) {
+    if (this.shootTimer <= 0 && bulletManager && typeof bulletManager.shootBotBullet === 'function') {
       bulletManager.shootBotBullet(this, targetPlayer);
       this.shootTimer = 400 + Math.random() * 200; // Boss bắn nhanh hơn bot thường
     }
@@ -150,7 +150,7 @@ export class BossBot extends Player {
       };
 
       // Tạo bullet với màu đặc biệt
-      if (bulletManager?.createBullet) {
+      if (bulletManager && typeof bulletManager.createBullet === 'function') {
         const bullet = bulletManager.createBullet(bulletData);
         if (bullet?.sprite) {
           bullet.sprite.setFillStyle(0xff2222); // Màu đỏ boss
