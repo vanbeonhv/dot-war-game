@@ -1,0 +1,260 @@
+# Dot War Game - Folder Structure Rules
+
+## 📁 Cấu trúc thư mục chuẩn
+
+```
+dot-war/
+├── core/           # Core game logic
+├── managers/       # Manager classes
+├── utils/          # Utility classes & functions
+├── ui/             # UI components
+├── entities/       # Game entities
+├── constants/      # Constants
+└── types/          # TypeScript types
+```
+
+## 🎯 Quy tắc phân loại file
+
+### 1. **`core/` - Core Game Logic**
+**Chứa:** Các file cốt lõi của game, không thể thiếu
+
+**Bao gồm:**
+- `GameScene.ts` - Scene chính của game (Phaser Scene)
+- `GameCanvas.tsx` - React component wrapper cho game
+- Các file core khác nếu cần
+
+**Quy tắc:**
+- Chỉ chứa file thực sự cần thiết cho core game logic
+- Không chứa utility functions hoặc manager classes
+- Tối đa 2-3 file trong thư mục này
+
+### 2. **`managers/` - Manager Classes**
+**Chứa:** Các class quản lý state và logic phức tạp
+
+**Bao gồm:**
+- `PowerUpManager.ts` - Quản lý power-ups
+- `GameWorld.ts` - Quản lý world state (obstacles, spawn points)
+- `PlayerManager.ts` - Quản lý players và bot AI
+- `BulletManager.ts` - Quản lý bullets và collision
+- Các manager khác cho game systems
+
+**Quy tắc:**
+- Tên file phải kết thúc bằng `Manager.ts`
+- Mỗi manager chỉ quản lý một domain cụ thể
+- Không chứa utility functions đơn giản
+- Có thể có dependencies với nhau
+
+### 3. **`utils/` - Utility Classes & Functions**
+**Chứa:** Các helper functions và utility classes
+
+**Bao gồm:**
+- `GameState.ts` - Quản lý game state (survival time, pause, etc.)
+- `GameInput.ts` - Xử lý input handling
+- `playerUtils.ts` - Utility functions cho players
+- `powerUpEffects.ts` - Effects cho power-ups
+- `effects.ts` - Visual effects
+- `botUtils.ts` - Bot utility functions
+
+**Quy tắc:**
+- Tên file utility functions phải kết thúc bằng `Utils.ts`
+- Tên file utility classes phải có prefix rõ ràng (Game, Player, etc.)
+- Mỗi file chỉ chứa functions/classes liên quan đến một domain
+- Không chứa complex business logic
+
+### 4. **`ui/` - UI Components**
+**Chứa:** Các React components và UI managers
+
+**Bao gồm:**
+- `GameUI.ts` - Game UI manager (Phaser UI)
+- `DotWarMenu.tsx` - Menu component
+- `DotWarGuide.tsx` - Guide component
+- Các UI components khác
+
+**Quy tắc:**
+- React components phải có extension `.tsx`
+- Phaser UI managers phải có extension `.ts`
+- Tên file phải mô tả rõ chức năng UI
+- Không chứa business logic phức tạp
+
+### 5. **`entities/` - Game Entities**
+**Chứa:** Các game objects và entities
+
+**Bao gồm:**
+- `Player.ts` - Player entity
+- `Bullet.ts` - Bullet entity
+- `PowerUp.ts` - Power-up entity
+- Các entities khác
+
+**Quy tắc:**
+- Tên file phải là tên của entity (số ít)
+- Mỗi file chỉ chứa một entity class
+- Entity phải extend từ Phaser.GameObjects hoặc tương tự
+- Không chứa manager logic
+
+### 6. **`constants/` - Constants**
+**Chứa:** Các hằng số và configuration
+
+**Bao gồm:**
+- `constants.ts` - Game constants
+- Các file config khác nếu cần
+
+**Quy tắc:**
+- Tất cả constants phải được export
+- Sử dụng UPPER_SNAKE_CASE cho constant names
+- Nhóm constants theo chức năng
+
+### 7. **`types/` - TypeScript Types**
+**Chứa:** Type definitions và interfaces
+
+**Bao gồm:**
+- `types.ts` - Game types và interfaces
+- Các file types khác nếu cần
+
+**Quy tắc:**
+- Sử dụng PascalCase cho interface/type names
+- Nhóm types theo domain
+- Export tất cả types cần thiết
+
+## 🔄 Quy tắc Import/Export
+
+### Import Paths
+```typescript
+// ✅ Đúng
+import { PlayerManager } from '../managers/PlayerManager';
+import { GameState } from '../utils/GameState';
+import { Player } from '../entities/Player';
+
+// ❌ Sai
+import { PlayerManager } from './PlayerManager';
+import { GameState } from './GameState';
+```
+
+### Export Rules
+```typescript
+// ✅ Đúng - Named exports
+export class PlayerManager { }
+export function updateScore() { }
+export const PLAYER_SPEED = 200;
+
+// ✅ Đúng - Default export cho main classes
+export default class GameScene { }
+
+// ❌ Sai - Mixed default/named exports
+export default { PlayerManager, GameState };
+```
+
+## 📝 Naming Conventions
+
+### Files
+- **Manager classes**: `*Manager.ts`
+- **Utility functions**: `*Utils.ts`
+- **Entities**: `EntityName.ts` (PascalCase)
+- **React components**: `ComponentName.tsx`
+- **Constants**: `constants.ts`
+- **Types**: `types.ts`
+
+### Classes
+- **Manager classes**: `GameManager`, `PlayerManager`
+- **Entity classes**: `Player`, `Bullet`, `PowerUp`
+- **Utility classes**: `GameState`, `GameInput`
+
+### Functions
+- **Utility functions**: `camelCase`
+- **Event handlers**: `handle*` prefix
+- **Async functions**: `async*` prefix
+
+### Variables
+- **Constants**: `UPPER_SNAKE_CASE`
+- **Variables**: `camelCase`
+- **Private members**: `_camelCase`
+
+## 🚫 Anti-patterns
+
+### Không được làm:
+1. **Đặt file sai thư mục**
+   ```typescript
+   // ❌ Sai - PlayerManager trong core/
+   core/PlayerManager.ts
+   
+   // ✅ Đúng - PlayerManager trong managers/
+   managers/PlayerManager.ts
+   ```
+
+2. **Import sai path**
+   ```typescript
+   // ❌ Sai
+   import { PlayerManager } from './PlayerManager';
+   
+   // ✅ Đúng
+   import { PlayerManager } from '../managers/PlayerManager';
+   ```
+
+3. **Tạo file không theo naming convention**
+   ```typescript
+   // ❌ Sai
+   player-manager.ts
+   PlayerManager.tsx
+   
+   // ✅ Đúng
+   PlayerManager.ts
+   ```
+
+4. **Trộn lẫn concerns**
+   ```typescript
+   // ❌ Sai - UI logic trong manager
+   class PlayerManager {
+     createUI() { }
+   }
+   
+   // ✅ Đúng - Tách riêng
+   class PlayerManager { }
+   class GameUI { }
+   ```
+
+## ✅ Checklist khi tạo file mới
+
+- [ ] File được đặt đúng thư mục theo chức năng
+- [ ] Tên file tuân theo naming convention
+- [ ] Import paths sử dụng relative paths đúng
+- [ ] Export/import sử dụng named exports
+- [ ] Không có circular dependencies
+- [ ] File chỉ chứa logic thuộc domain của nó
+- [ ] TypeScript types được định nghĩa rõ ràng
+
+## 🔧 Migration Rules
+
+Khi refactor code cũ:
+1. **Không xóa file cũ** cho đến khi đã test kỹ
+2. **Tạo file mới** ở đúng vị trí
+3. **Cập nhật imports** trong tất cả files liên quan
+4. **Test thoroughly** trước khi xóa file cũ
+5. **Update documentation** nếu cần
+
+## 📚 Examples
+
+### Tạo Manager mới
+```typescript
+// managers/SoundManager.ts
+export class SoundManager {
+  // Sound management logic
+}
+```
+
+### Tạo Utility mới
+```typescript
+// utils/soundUtils.ts
+export function playSound(soundName: string) { }
+export function stopSound(soundName: string) { }
+```
+
+### Tạo Entity mới
+```typescript
+// entities/Explosion.ts
+export class Explosion extends Phaser.GameObjects.Sprite {
+  // Explosion entity logic
+}
+```
+
+---
+
+**Lưu ý:** Tuân thủ các quy tắc này sẽ giúp code dễ maintain, scale và collaborate trong team. 
