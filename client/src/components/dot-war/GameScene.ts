@@ -17,79 +17,6 @@ import { createHitEffect, createUltimateEffect } from './ulti/effects';
 import { isCollidingObstacle, respawnPlayer, updateLeaderboard, updateScore } from './ulti/playerUtils';
 import { applyPowerUpEffect } from './ulti/powerUpEffects';
 
-function _getRandomPos(width: number, height: number) {
-  return {
-    x: Math.random() * (width - 2 * PLAYER_RADIUS) + PLAYER_RADIUS,
-    y: Math.random() * (height - 2 * PLAYER_RADIUS) + PLAYER_RADIUS,
-  };
-}
-
-function _getSafeRandomPos(obstacles: Phaser.GameObjects.Rectangle[], radius: number) {
-  // Tạo lưới các vị trí có thể
-  const gridSize = radius * 4;
-  const cols = Math.floor(800 / gridSize);
-  const rows = Math.floor(600 / gridSize);
-  const positions = [];
-
-  // Thu thập tất cả vị trí có thể
-  for (let col = 0; col < cols; col++) {
-    for (let row = 0; row < rows; row++) {
-      const x = (col + 0.5) * gridSize;
-      const y = (row + 0.5) * gridSize;
-
-      // Kiểm tra khoảng cách đến biên map
-      if (x < radius * 3 || x > 800 - radius * 3 || y < radius * 3 || y > 600 - radius * 3) {
-        continue;
-      }
-
-      // Kiểm tra va chạm với obstacles
-      if (!isCollidingObstacle(obstacles, x, y, radius)) {
-        positions.push({ x, y });
-      }
-    }
-  }
-
-  // Nếu có vị trí an toàn, chọn ngẫu nhiên một trong số đó
-  if (positions.length > 0) {
-    const randomIndex = Math.floor(Math.random() * positions.length);
-    return positions[randomIndex];
-  }
-
-  // Nếu không tìm được vị trí an toàn trong lưới, thử random
-  const maxRandomTries = 100;
-  for (let i = 0; i < maxRandomTries; i++) {
-    const x = radius * 3 + Math.random() * (800 - radius * 6);
-    const y = radius * 3 + Math.random() * (600 - radius * 6);
-    if (!isCollidingObstacle(obstacles, x, y, radius)) {
-      return { x, y };
-    }
-  }
-
-  // Fallback: tìm điểm xa obstacles nhất
-  let bestPos = { x: 400, y: 300 };
-  let maxMinDistance = 0;
-
-  for (let i = 0; i < 20; i++) {
-    const x = radius * 3 + Math.random() * (800 - radius * 6);
-    const y = radius * 3 + Math.random() * (600 - radius * 6);
-
-    let minDistance = Number.MAX_VALUE;
-    for (const obstacle of obstacles) {
-      const dx = x - obstacle.x;
-      const dy = y - obstacle.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      minDistance = Math.min(minDistance, distance);
-    }
-
-    if (minDistance > maxMinDistance) {
-      maxMinDistance = minDistance;
-      bestPos = { x, y };
-    }
-  }
-
-  return bestPos;
-}
-
 export default class GameScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wKey!: Phaser.Input.Keyboard.Key;
@@ -286,47 +213,6 @@ export default class GameScene extends Phaser.Scene {
       }
     });
 
-    function _isObstacleOverlapping(
-      centerX: number,
-      centerY: number,
-      w: number,
-      h: number,
-      obstacles: Phaser.GameObjects.Rectangle[]
-    ): boolean {
-      const safeGap = PLAYER_RADIUS * 1.2;
-
-      // Kiểm tra nếu quá gần biên map
-      const mapMargin = PLAYER_RADIUS * 3;
-      if (
-        centerX - w / 2 < mapMargin ||
-        centerX + w / 2 > 800 - mapMargin ||
-        centerY - h / 2 < mapMargin ||
-        centerY + h / 2 > 600 - mapMargin
-      ) {
-        return true;
-      }
-
-      // Tính vùng bao của obstacle mới
-      const x1 = centerX - w / 2 - safeGap;
-      const x2 = centerX + w / 2 + safeGap;
-      const y1 = centerY - h / 2 - safeGap;
-      const y2 = centerY + h / 2 + safeGap;
-
-      // Kiểm tra va chạm với các obstacles hiện có
-      for (const obstacle of obstacles) {
-        const ox1 = obstacle.x - obstacle.width / 2;
-        const ox2 = obstacle.x + obstacle.width / 2;
-        const oy1 = obstacle.y - obstacle.height / 2;
-        const oy2 = obstacle.y + obstacle.height / 2;
-
-        // Kiểm tra chồng lấn giữa hai vùng bao
-        if (!(x2 < ox1 - safeGap || x1 > ox2 + safeGap || y2 < oy1 - safeGap || y1 > oy2 + safeGap)) {
-          return true;
-        }
-      }
-      return false;
-    }
-
     // Khởi tạo PowerUpManager
     this.powerUpManager = new PowerUpManager(this, (x, y, radius) => isCollidingObstacle(this.obstacles, x, y, radius));
   }
@@ -411,7 +297,7 @@ export default class GameScene extends Phaser.Scene {
       this.respawnTimers[0] <= 0
     ) {
       // Bắn 10 viên đạn spread ±45 độ quanh hướng chuột
-      const baseAngle = Math.atan2(pointer.worldY - mainPlayer.data.x, pointer.worldX - mainPlayer.data.y);
+      const baseAngle = Math.atan2(pointer.worldY - mainPlayer.data.y, pointer.worldX - mainPlayer.data.x);
       const spread = Math.PI / 4; // ±45 độ
       const numBullets = 10;
       for (let i = 0; i < numBullets; i++) {
