@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import DotWarGuide from '@/components/dot-war/DotWarGuide';
-import DotWarMenu from '@/components/dot-war/DotWarMenu';
-import GameCanvas from '@/components/dot-war/GameCanvas';
+import GameCanvas from '@/components/dot-war/core/GameCanvas';
+import DotWarGuide from '@/components/dot-war/ui/DotWarGuide';
+import DotWarMenu from '@/components/dot-war/ui/DotWarMenu';
 
 const DotWarGame = () => {
   const [screen, setScreen] = useState<'menu' | 'guide' | 'game'>('menu');

@@ -1,5 +1,5 @@
-import Phaser from 'phaser';
-import type { BulletData } from './types';
+import type Phaser from 'phaser';
+import type { BulletData } from '../types/types';
 
 export class Bullet {
   public data: BulletData;

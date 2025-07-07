@@ -1,6 +1,6 @@
-import { PLAYER_RADIUS } from '../constants';
-import type { Player } from '../Player';
-import type { PowerUpData } from '../types';
+import { PLAYER_RADIUS } from '../constants/constants';
+import type { Player } from '../entities/Player';
+import type { PowerUpData } from '../types/types';
 
 export function applyPowerUpEffect(
   mainPlayer: Player,

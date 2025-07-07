@@ -1,5 +1,5 @@
-import Phaser from "phaser";
-import type { PowerUpData, PowerUpType } from "./types";
+import type Phaser from 'phaser';
+import type { PowerUpData, PowerUpType } from './types';
 
 export class PowerUp {
   public data: PowerUpData;
@@ -10,14 +10,14 @@ export class PowerUp {
 
   constructor(scene: Phaser.Scene, x: number, y: number, type: PowerUpType) {
     this.scene = scene;
-    this.data = { 
+    this.data = {
       id: Math.random().toString(36).substr(2, 9),
-      x, 
-      y, 
+      x,
+      y,
       type,
-      spawnTime: Date.now()
+      spawnTime: Date.now(),
     };
-    
+
     // Tạo visual cho power-up
     this.createVisual();
   }
@@ -25,23 +25,25 @@ export class PowerUp {
   private createVisual() {
     // Màu sắc và kích thước cho từng loại power-up
     const config = this.getPowerUpConfig();
-    
+
     // Tạo circle chính
     this.circle = this.scene.add.circle(this.data.x, this.data.y, 12, config.color);
     this.circle.setStrokeStyle(2, config.borderColor);
-    
+
     // Tạo icon hoặc text cho power-up
-    this.icon = this.scene.add.text(this.data.x, this.data.y, config.icon, {
-      fontSize: '16px',
-      color: config.textColor,
-      fontFamily: 'Arial'
-    }).setOrigin(0.5);
-    
+    this.icon = this.scene.add
+      .text(this.data.x, this.data.y, config.icon, {
+        fontSize: '16px',
+        color: config.textColor,
+        fontFamily: 'Arial',
+      })
+      .setOrigin(0.5);
+
     // Thêm hiệu ứng glow (nếu có pipeline)
     if (this.circle.preFX) {
       this.circle.preFX.addGlow(config.glowColor, 4);
     }
-    
+
     // Animation floating
     this.scene.tweens.add({
       targets: [this.circle, this.icon],
@@ -49,7 +51,7 @@ export class PowerUp {
       duration: 1000,
       yoyo: true,
       repeat: -1,
-      ease: 'Sine.easeInOut'
+      ease: 'Sine.easeInOut',
     });
   }
 
@@ -61,7 +63,7 @@ export class PowerUp {
           borderColor: 0xff4757,
           textColor: '#ffffff',
           glowColor: 0xff6b6b,
-          icon: '❤️'
+          icon: '❤️',
         };
       case 'energy':
         return {
@@ -69,7 +71,7 @@ export class PowerUp {
           borderColor: 0x3742fa,
           textColor: '#ffffff',
           glowColor: 0x5352ed,
-          icon: '⚡'
+          icon: '⚡',
         };
       case 'speed':
         return {
@@ -77,7 +79,7 @@ export class PowerUp {
           borderColor: 0x1e90ff,
           textColor: '#ffffff',
           glowColor: 0x2ed573,
-          icon: '💨'
+          icon: '💨',
         };
       case 'rapid':
         return {
@@ -85,7 +87,7 @@ export class PowerUp {
           borderColor: 0xff6348,
           textColor: '#ffffff',
           glowColor: 0xffa502,
-          icon: '🔥'
+          icon: '🔥',
         };
       case 'shield':
         return {
@@ -93,7 +95,7 @@ export class PowerUp {
           borderColor: 0x5352ed,
           textColor: '#ffffff',
           glowColor: 0x70a1ff,
-          icon: '🛡️'
+          icon: '🛡️',
         };
       case 'damage':
         return {
@@ -101,7 +103,7 @@ export class PowerUp {
           borderColor: 0xff3838,
           textColor: '#ffffff',
           glowColor: 0xff4757,
-          icon: '⚔️'
+          icon: '⚔️',
         };
       default:
         return {
@@ -109,7 +111,7 @@ export class PowerUp {
           borderColor: 0xcccccc,
           textColor: '#000000',
           glowColor: 0xffffff,
-          icon: '❓'
+          icon: '❓',
         };
     }
   }
@@ -142,10 +144,7 @@ export class PowerUp {
 
   // Kiểm tra va chạm với player
   isCollidingWithPlayer(playerX: number, playerY: number, playerRadius: number = 20): boolean {
-    const distance = Math.sqrt(
-      Math.pow(this.data.x - playerX, 2) + 
-      Math.pow(this.data.y - playerY, 2)
-    );
-    return distance < (8 + playerRadius); // 8 là radius của power-up
+    const distance = Math.sqrt((this.data.x - playerX) ** 2 + (this.data.y - playerY) ** 2);
+    return distance < 8 + playerRadius; // 8 là radius của power-up
   }
-} 
+}

@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from "react";
-import Phaser from "phaser";
-import GameScene from "./GameScene";
+import Phaser from 'phaser';
+import type React from 'react';
+import { useEffect, useRef } from 'react';
+import GameScene from './GameScene';
 
 const GameCanvas: React.FC = () => {
   const gameRef = useRef<HTMLDivElement>(null);
@@ -14,7 +15,7 @@ const GameCanvas: React.FC = () => {
         height: 600,
         parent: gameRef.current,
         scene: GameScene,
-        backgroundColor: "#22223b",
+        backgroundColor: '#22223b',
       };
       gameInstance.current = new Phaser.Game(config);
     }
@@ -29,4 +30,4 @@ const GameCanvas: React.FC = () => {
   return <div ref={gameRef} />;
 };
 
-export default GameCanvas; 
+export default GameCanvas;

@@ -1,8 +1,8 @@
 import type Phaser from 'phaser';
-import { Bullet } from '../Bullet';
-import { BULLET_SPEED, PLAYER_RADIUS } from '../constants';
-import type { Player } from '../Player';
-import type { BulletData } from '../types';
+import { BULLET_SPEED, PLAYER_RADIUS } from '../constants/constants';
+import { Bullet } from '../entities/Bullet';
+import type { Player } from '../entities/Player';
+import type { BulletData } from '../types/types';
 
 export function shootBotBullet(bullets: any[], bot: Player, target: Player, scene: Phaser.Scene) {
   bot.flashGunEffect();

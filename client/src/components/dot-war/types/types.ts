@@ -50,4 +50,4 @@ export interface PowerUpData {
   duration?: number; // thời gian hiệu lực (giây)
   value?: number; // giá trị (damage, speed boost, etc.)
   spawnTime: number; // thời điểm spawn (để tính auto destroy)
-} 
+}

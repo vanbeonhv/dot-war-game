@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { Bullet } from './Bullet';
 import {
   BULLET_RADIUS,
   BULLET_SPEED,
@@ -8,14 +7,15 @@ import {
   PLAYER_RADIUS,
   PLAYER_SPEED,
   RESPAWN_TIME,
-} from './constants';
-import { Player } from './Player';
-import { PowerUpManager } from './PowerUpManager';
-import type { BulletData } from './types';
-import { shootBotBullet } from './ulti/botUtils';
-import { createHitEffect, createUltimateEffect } from './ulti/effects';
-import { isCollidingObstacle, respawnPlayer, updateLeaderboard, updateScore } from './ulti/playerUtils';
-import { applyPowerUpEffect } from './ulti/powerUpEffects';
+} from '../constants/constants';
+import { Bullet } from '../entities/Bullet';
+import { Player } from '../entities/Player';
+import { PowerUpManager } from '../managers/PowerUpManager';
+import type { BulletData } from '../types/types';
+import { shootBotBullet } from '../utils/botUtils';
+import { createHitEffect, createUltimateEffect } from '../utils/effects';
+import { isCollidingObstacle, respawnPlayer, updateLeaderboard, updateScore } from '../utils/playerUtils';
+import { applyPowerUpEffect } from '../utils/powerUpEffects';
 
 export default class GameScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
