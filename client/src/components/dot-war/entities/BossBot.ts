@@ -196,10 +196,10 @@ export class BossBot extends Player {
 
   override drawHealthBar() {
     this.healthBar.clear();
-    const barWidth = 80; // Thanh máu boss dài hơn
-    const barHeight = 8;
+    const barWidth = 50; // Ngắn lại, vừa với boss
+    const barHeight = 10;
     const x = this.data.x - barWidth / 2;
-    const y = this.data.y - 60; // Cao hơn đầu boss
+    const y = this.data.y - 60;
     // Background máu
     this.healthBar.fillStyle(0x333333, 1);
     this.healthBar.fillRect(x, y, barWidth, barHeight);
