@@ -1,4 +1,4 @@
-# 📊 Progress - Dot War Game 2D (Single Player)
+# 📊 Progress - Dot War Game 2D (Survival Mode)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/vanbeonhv/dot-war-game?utm_source=oss&utm_medium=github&utm_campaign=vanbeonhv%2Fdot-war-game&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 ## 🎮 Demo
 
@@ -89,22 +89,55 @@ https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65
 - [ ] Power-up tự động biến mất sau 10 giây nếu không ai nhặt
 - [ ] Giới hạn tối đa 2-3 power-up trên map cùng lúc
 
-### 6. 🚀 UI/UX Polish & Định hướng tiếp theo
+### 6. 🎯 Survival Mode - Chế độ sinh tồn
 
-- [ ] Thêm hiệu ứng phụ động cho các power-up còn lại (damage, health, energy)
-- [x] Màn hình hướng dẫn phím điều khiển (ASWD, và Space để ulti), bằng hình ảnh trực quan
-- [ ] Giảm tốc độ đan xuống, mình đang bắn nhanh quá
-- [ ] Quyết định lối chơi, chứ bắn hoài cũng ko hay. Ví dụ tạo map, bắn qua màn từ từ
+#### 6.1 Core Survival Mechanics
+- [x] Hệ thống thời gian sống sót (timer countdown)
+- [ ] Wave system: mỗi wave tăng độ khó
+- [x] Mục tiêu rõ ràng: "Sống sót X phút" hoặc "Vượt qua X wave"
+- [x] Game over screen với thống kê (thời gian sống, điểm số, wave đạt được)
+- [ ] High score system cho survival mode
+
+#### 6.2 Progressive Difficulty
+- [ ] Bot spawn nhiều hơn theo thời gian
+- [ ] Bot di chuyển nhanh hơn ở wave cao
+- [ ] Bot bắn nhanh hơn và chính xác hơn
+- [ ] Bot có thể dùng ultimate skill ở wave cao
+- [ ] Boss bot xuất hiện cuối mỗi 5 wave
+
+#### 6.3 Survival Rewards & Progression
+- [ ] Combo system: bắn liên tiếp được bonus điểm
+- [ ] Streak bonus: sống sót càng lâu càng nhiều điểm
+- [ ] Survival milestones: đạt 1 phút, 2 phút, 5 phút...
+- [ ] Unlock new abilities sau mỗi milestone
+- [ ] Persistent upgrades giữa các game
+
+#### 6.4 Enhanced AI & Gameplay
+- [ ] Bot có thể thu thập power-up
+- [ ] Bot có thể tạo thành nhóm tấn công
+- [ ] Bot tránh đạn thông minh hơn
+- [ ] Bot có thể dùng shield và ultimate
+- [ ] Bot có thể heal khi HP thấp
+
+#### 6.5 Dynamic Environment
+- [ ] Map thay đổi theo thời gian (obstacle di chuyển)
+- [ ] Khu vực nguy hiểm (lava, poison) xuất hiện
+- [ ] Safe zones tạm thời
+- [ ] Teleport points
+- [ ] Environmental hazards
+
+#### 6.6 UI/UX Polish
+- [ ] HUD hiển thị thời gian sống sót, wave hiện tại
 - [ ] HUD hiển thị power-up đang active và thời gian còn lại
-- [ ] Polish UI/UX: hiệu ứng, âm thanh, animation mượt mà hơn
-- [ ] Thêm chế độ chơi mới, nâng cấp AI bot
-- [ ] Tối ưu code, tách logic game và UI rõ ràng hơn
-- [ ] Thêm hướng dẫn chơi, màn hình game over, bảng xếp hạng
-- [ ] Màn hình game over
-- [ ] Tùy chỉnh tốc độ di chuyển, tốc độ đạn
+- [ ] Màn hình hướng dẫn phím điều khiển (WASD, Q để ulti)
+- [ ] Hiệu ứng âm thanh và visual feedback
 - [ ] Toggle sound effects
-- [ ] Thêm item hồi máu, regen máu
-- [ ] Highlight player dẫn đầu
-- [ ] Cơ chế "bounty": giết người top sẽ +20 điểm
-- [ ] Cảnh báo nếu có người vượt top
-- [ ] Thêm chế độ chơi mới (One Shot, Turbo, King of the Hill...)
+- [ ] Tùy chỉnh tốc độ di chuyển, tốc độ đạn
+- [ ] Polish UI/UX: hiệu ứng, âm thanh, animation mượt mà hơn
+
+#### 6.7 Code Optimization
+- [ ] Tối ưu code, tách logic game và UI rõ ràng hơn
+- [ ] Refactor game state management
+- [ ] Implement proper game modes system
+- [ ] Add configuration system cho difficulty
+- [ ] Performance optimization cho nhiều bot

@@ -112,6 +112,13 @@ export default class GameScene extends Phaser.Scene {
   private youLineText?: Phaser.GameObjects.Text;
   private ultimateKey!: Phaser.Input.Keyboard.Key;
   private powerUpManager!: PowerUpManager;
+
+  // Survival Mode properties
+  private survivalTimer!: Phaser.GameObjects.Text;
+  private survivalTime: number = 0; // Time survived in milliseconds
+  private survivalTarget: number = 5 * 60 * 1000; // 5 minutes target
+  private isSurvivalMode: boolean = true;
+  private gameOver: boolean = false;
   private getRandomSpawnPoint() {
     const margin = PLAYER_RADIUS * 2; // Giảm margin để tăng phạm vi di chuyển
     let maxTries = 50;
@@ -158,6 +165,11 @@ export default class GameScene extends Phaser.Scene {
   preload() {}
 
   create() {
+    // Reset survival mode state on restart
+    this.survivalTime = 0;
+    this.gameOver = false;
+    this.isPaused = false;
+
     this.highScore = parseInt(localStorage.getItem('dotWarHighScore') || '0');
 
     // Khởi tạo các thông số khác trước
@@ -181,6 +193,14 @@ export default class GameScene extends Phaser.Scene {
       rich: true,
     });
     this.leaderboardText.setDepth(100);
+
+    // Create survival timer
+    this.survivalTimer = this.add.text(20, 20, 'Survival Time: 00:00', {
+      font: '24px Arial',
+      color: '#00ff00',
+      fontStyle: 'bold',
+    });
+    this.survivalTimer.setDepth(100);
 
     // Tạo obstacles với kích thước vừa phải và đảm bảo ít nhất 4 cái
     this.obstacles = [];
@@ -369,6 +389,17 @@ export default class GameScene extends Phaser.Scene {
     if (this.isPaused) {
       return;
     }
+
+    // Update survival timer
+    if (this.isSurvivalMode && !this.gameOver && this.respawnTimers[0] <= 0) {
+      this.survivalTime += delta;
+      this.updateSurvivalTimer();
+
+      // Check if target reached
+      if (this.survivalTime >= this.survivalTarget) {
+        this.handleSurvivalVictory();
+      }
+    }
     const pointer = this.input.activePointer;
     const mainPlayer = this.players[0];
     mainPlayer.updateGunDirection(pointer.worldX, pointer.worldY);
@@ -465,6 +496,12 @@ export default class GameScene extends Phaser.Scene {
             // Reset energy về 0 khi chết
             player.data.energy = 0;
             player.drawHealthBar();
+
+            // Handle main player death in survival mode
+            if (player.data.id === 'me' && this.isSurvivalMode) {
+              this.handleSurvivalGameOver();
+            }
+
             // Tăng energy cho người bắn nếu không tự bắn mình
             if (bullet.data.ownerId !== player.data.id) {
               const shooter = this.players.find((p) => p.data.id === bullet.data.ownerId);
@@ -596,5 +633,170 @@ export default class GameScene extends Phaser.Scene {
       // Update shield position khi player di chuyển
       mainPlayer.updateShieldPosition();
     }
+  }
+
+  private updateSurvivalTimer() {
+    const minutes = Math.floor(this.survivalTime / 60000);
+    const seconds = Math.floor((this.survivalTime % 60000) / 1000);
+    const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    // Change color based on time remaining
+    const timeRemaining = this.survivalTarget - this.survivalTime;
+    let color = '#00ff00'; // Green
+    if (timeRemaining < 60000) {
+      // Less than 1 minute
+      color = '#ff0000'; // Red
+    } else if (timeRemaining < 180000) {
+      // Less than 3 minutes
+      color = '#ffff00'; // Yellow
+    }
+
+    this.survivalTimer.setText(`Survival Time: ${timeString}`);
+    this.survivalTimer.setColor(color);
+  }
+
+  private handleSurvivalVictory() {
+    this.gameOver = true;
+
+    // Create victory screen
+    const victoryText = this.add.text(400, 250, 'SURVIVAL VICTORY!', {
+      font: '48px Arial',
+      color: '#00ff00',
+      fontStyle: 'bold',
+    });
+    victoryText.setOrigin(0.5);
+    victoryText.setDepth(200);
+
+    const timeText = this.add.text(
+      400,
+      320,
+      `You survived for ${Math.floor(this.survivalTime / 60000)}:${Math.floor((this.survivalTime % 60000) / 1000)
+        .toString()
+        .padStart(2, '0')}`,
+      {
+        font: '24px Arial',
+        color: '#ffffff',
+      }
+    );
+    timeText.setOrigin(0.5);
+    timeText.setDepth(200);
+
+    const restartText = this.add.text(400, 380, 'Press SPACE to restart', {
+      font: '20px Arial',
+      color: '#ffff00',
+    });
+    restartText.setOrigin(0.5);
+    restartText.setDepth(200);
+
+    // Add restart functionality
+    const spaceKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    if (spaceKey) {
+      spaceKey.on('down', () => {
+        this.resetGame();
+      });
+    }
+
+    // Pause the game
+    this.isPaused = true;
+  }
+
+  private handleSurvivalGameOver() {
+    this.gameOver = true;
+
+    // Create game over screen
+    const gameOverText = this.add.text(400, 250, 'GAME OVER', {
+      font: '48px Arial',
+      color: '#ff0000',
+      fontStyle: 'bold',
+    });
+    gameOverText.setOrigin(0.5);
+    gameOverText.setDepth(200);
+
+    const timeText = this.add.text(
+      400,
+      320,
+      `You survived for ${Math.floor(this.survivalTime / 60000)}:${Math.floor((this.survivalTime % 60000) / 1000)
+        .toString()
+        .padStart(2, '0')}`,
+      {
+        font: '24px Arial',
+        color: '#ffffff',
+      }
+    );
+    timeText.setOrigin(0.5);
+    timeText.setDepth(200);
+
+    const restartText = this.add.text(400, 380, 'Press SPACE to restart', {
+      font: '20px Arial',
+      color: '#ffff00',
+    });
+    restartText.setOrigin(0.5);
+    restartText.setDepth(200);
+
+    // Add restart functionality
+    const spaceKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    if (spaceKey) {
+      spaceKey.on('down', () => {
+        this.resetGame();
+      });
+    }
+
+    // Pause the game
+    this.isPaused = true;
+  }
+
+  shutdown() {
+    // Clean up event listeners and reset state
+    this.input.keyboard?.removeAllListeners();
+    this.input.removeAllListeners();
+
+    // Reset survival mode state
+    this.survivalTime = 0;
+    this.gameOver = false;
+    this.isPaused = false;
+
+    // Clear all game objects
+    this.players = [];
+    this.bullets = [];
+    this.respawnTimers = [];
+    this.respawnTexts = [];
+    this.botMoveTimers = [];
+    this.botShootTimers = [];
+    this.obstacles = [];
+
+    // Reset PowerUpManager
+    if (this.powerUpManager) {
+      this.powerUpManager.destroy();
+    }
+
+    // Destroy all game objects
+    this.children.removeAll(true);
+  }
+
+  private resetGame() {
+    // Reset all game state
+    this.survivalTime = 0;
+    this.gameOver = false;
+    this.isPaused = false;
+
+    // Clear all arrays
+    this.players = [];
+    this.bullets = [];
+    this.respawnTimers = [];
+    this.respawnTexts = [];
+    this.botMoveTimers = [];
+    this.botShootTimers = [];
+    this.obstacles = [];
+
+    // Reset PowerUpManager
+    if (this.powerUpManager) {
+      this.powerUpManager.destroy();
+    }
+
+    // Remove all game objects
+    this.children.removeAll(true);
+
+    // Restart the scene
+    this.scene.restart();
   }
 }
