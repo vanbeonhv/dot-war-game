@@ -142,6 +142,75 @@ https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65
 - [ ] Add configuration system cho difficulty
 - [ ] Performance optimization cho nhiều bot
 
+### 7. 🦾 Boss Bot (Survival Mode)
+
+#### 7.1 Thiết kế tổng quan
+- [ ] Boss xuất hiện ở cuối mỗi 5 wave (Wave 5, 10, 15, ...)
+- [ ] Boss có HP cao (15~30 máu), kích thước lớn, hiệu ứng đặc biệt
+- [ ] Boss có AI di chuyển thông minh, tấn công đa dạng
+- [ ] Boss có ultimate skill (bắn spread, burst, đạn nổ...)
+- [ ] Khi gần chết, boss có thể "enrage" (tăng tốc, đổi pattern)
+- [ ] Khi tiêu diệt boss: nhận nhiều điểm, rơi nhiều power-up, hồi máu/energy
+- [ ] Thanh máu boss lớn trên HUD, hiệu ứng đặc biệt khi boss xuất hiện/chết
+
+#### 7.2 Checklist Boss Bot
+- [ ] Tạo class `BossBot` kế thừa từ `Player`
+- [ ] Logic spawn boss ở cuối mỗi 5 wave
+- [ ] AI di chuyển và tấn công đặc biệt cho boss
+- [ ] Ultimate skill cho boss
+- [ ] Hiệu ứng đặc biệt (glow, outline, particle)
+- [ ] Thanh máu boss trên HUD
+- [ ] Phần thưởng khi tiêu diệt boss
+- [ ] Âm thanh/visual effect khi boss xuất hiện/chết
+
+#### 7.3 Mô tả chi tiết Boss Bot
+- **HP cao**: Gấp 5-10 lần bot thường (ví dụ: 15~30 máu)
+- **Kích thước lớn hơn**: Sprite lớn hơn bot thường (gấp 1.5~2 lần)
+- **Tốc độ di chuyển**: Nhanh hơn bot thường ở wave đầu, có thể tăng khi gần chết
+- **Tốc độ bắn**: Bắn liên tục hoặc burst fire
+- **Ultimate**: Có thể dùng ultimate skill (bắn nhiều viên, đạn xuyên, đạn nổ...)
+- **Hiệu ứng đặc biệt**: Glow, outline, particle riêng biệt
+- **Tên riêng**: Hiển thị "BOSS" hoặc tên đặc biệt trên đầu
+- **AI**: Đuổi theo player chính, tránh đạn, triệu hồi bot thường ở wave cao
+- **Enrage**: Khi gần chết, tăng tốc hoặc đổi pattern tấn công
+- **Phần thưởng**: Nhiều điểm, nhiều power-up, hồi máu/energy
+- **UI/UX**: Thanh máu boss lớn, hiệu ứng rung màn hình/âm thanh khi boss xuất hiện/chết
+
+#### 7.4 Gợi ý cấu trúc code
+
+**entities/BossBot.ts**
+```ts
+import { Player } from './Player';
+
+export class BossBot extends Player {
+  constructor(scene, config) {
+    super(scene, {
+      ...config,
+      hp: 20, // hoặc tuỳ theo wave
+      color: '#ff2222',
+      isBoss: true,
+      // ...các thuộc tính riêng
+    });
+    // Thêm hiệu ứng, scale sprite, v.v.
+  }
+
+  updateAI(targetPlayer) {
+    // Di chuyển thông minh, tấn công, dùng ultimate, v.v.
+  }
+
+  useUltimate() {
+    // Bắn spread, burst, hoặc đạn đặc biệt
+  }
+}
+```
+
+**managers/PlayerManager.ts**
+- Khi đến boss wave, spawn 1 BossBot thay vì bot thường.
+- Theo dõi boss còn sống để kết thúc wave.
+
+**ui/GameUI.ts**
+- Thêm thanh máu boss lớn ở trên cùng màn hình khi boss xuất hiện.
+
 ---
 
 ### 🆕 **Mô tả Survival Mode (Wave System mới)**

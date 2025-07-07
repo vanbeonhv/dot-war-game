@@ -110,6 +110,44 @@ export class BulletManager {
 
           if (wasDamaged && player.data.hp <= 0) {
             updateScore(players, j, bullet.data.ownerId, updateLeaderboard);
+
+            // Phần thưởng đặc biệt khi tiêu diệt boss
+            if (player.data.name === 'BOSS') {
+              // Nhiều điểm hơn
+              const shooter = players.find((p) => p.data.id === bullet.data.ownerId);
+              if (shooter) {
+                shooter.setScore(shooter.getScore() + 100); // +100 điểm thay vì +10
+              }
+
+              // Hồi máu cho player chính
+              const mainPlayer = players[0];
+              if (mainPlayer.data.hp < 3) {
+                mainPlayer.data.hp = Math.min(3, mainPlayer.data.hp + 1);
+                mainPlayer.drawHealthBar();
+              }
+
+              // Hồi energy cho player chính
+              const currentEnergy = mainPlayer.data.energy ?? 0;
+              const maxEnergy = mainPlayer.data.maxEnergy ?? 5;
+              if (currentEnergy < maxEnergy) {
+                mainPlayer.data.energy = Math.min(maxEnergy, currentEnergy + 2);
+                mainPlayer.drawHealthBar();
+              }
+
+              // Hiệu ứng đặc biệt khi boss chết
+              this.scene.cameras.main.shake(500, 0.02);
+              const explosion = this.scene.add.circle(player.data.x, player.data.y, 60, 0xff2222, 0.8);
+              explosion.setDepth(15);
+              this.scene.tweens.add({
+                targets: explosion,
+                alpha: 0,
+                scaleX: 3,
+                scaleY: 3,
+                duration: 800,
+                onComplete: () => explosion.destroy(),
+              });
+            }
+
             // Handle player death
             player.setVisible(false);
             player.data.energy = 0;
@@ -135,7 +173,7 @@ export class BulletManager {
               });
               respawnTexts[j] = countdownText;
             } else {
-              // Bot - không tạo respawn text
+              // Bot và Boss - không tạo respawn text
               respawnTexts[j] = null;
             }
 

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import type { PlayerData } from './types';
+import type { PlayerData } from '../types/types';
 
 export class Player {
   public data: PlayerData;
@@ -7,8 +7,8 @@ export class Player {
   public nameText: Phaser.GameObjects.Text;
   public healthBar: Phaser.GameObjects.Graphics;
   public gun: Phaser.GameObjects.Rectangle;
-  private scene: Phaser.Scene;
-  private glowCircle?: Phaser.GameObjects.Arc;
+  protected scene: Phaser.Scene;
+  protected glowCircle?: Phaser.GameObjects.Arc;
   private ultimateText?: Phaser.GameObjects.Text;
 
   constructor(scene: Phaser.Scene, data: PlayerData) {

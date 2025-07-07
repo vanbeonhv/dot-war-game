@@ -96,6 +96,14 @@ export default class GameScene extends Phaser.Scene {
         aliveBots
       );
 
+      // Update boss health bar
+      const boss = this.playerManager.getPlayers().find((p) => p.data.name === 'BOSS');
+      if (boss && this.playerManager.getRespawnTimers()[this.playerManager.getPlayers().indexOf(boss)] <= 0) {
+        this.gameUI.showBossHealthBar(boss.data.hp, 20 + Math.floor(this.gameState.getCurrentWave() / 5) * 10);
+      } else {
+        this.gameUI.hideBossHealthBar();
+      }
+
       // Check if target reached
       if (this.gameState.isSurvivalTargetReached()) {
         this.handleSurvivalVictory();

@@ -11,6 +11,7 @@ import {
   PLAYER_RADIUS,
   PLAYER_SPEED,
 } from '../constants/constants';
+import { BossBot } from '../entities/BossBot';
 import { Player } from '../entities/Player';
 import type { GameState } from '../utils/GameState';
 import { respawnPlayer } from '../utils/playerUtils';
@@ -61,8 +62,6 @@ export class PlayerManager {
 
   private spawnWaveBots() {
     const currentWave = this.gameState.getCurrentWave();
-    const targetBotCount = Math.min(MAX_BOTS_ON_SCREEN, INITIAL_BOT_COUNT + (currentWave - 1) * BOT_INCREASE_PER_WAVE);
-
     // Xóa tất cả bot cũ (trừ player chính)
     for (let i = this.players.length - 1; i > 0; i--) {
       this.players[i].destroy();
@@ -74,12 +73,42 @@ export class PlayerManager {
       this.respawnTexts.splice(i, 1);
     }
 
-    // Spawn bot mới
-    for (let i = 0; i < targetBotCount; i++) {
-      this.spawnBot();
+    if (currentWave % 5 === 0) {
+      // Boss wave: chỉ spawn 1 BossBot
+      this.spawnBossBot();
+      this.currentBotCount = 1;
+    } else {
+      // Wave thường: spawn bot thường
+      const targetBotCount = Math.min(
+        MAX_BOTS_ON_SCREEN,
+        INITIAL_BOT_COUNT + (currentWave - 1) * BOT_INCREASE_PER_WAVE
+      );
+      for (let i = 0; i < targetBotCount; i++) {
+        this.spawnBot();
+      }
+      this.currentBotCount = targetBotCount;
     }
+  }
 
-    this.currentBotCount = targetBotCount;
+  private spawnBossBot() {
+    const bossSpawnPoint = this.gameWorld.getRandomSpawnPoint();
+    const boss = new BossBot(this.scene, {
+      id: `boss_${this.botIdCounter++}`,
+      name: 'BOSS',
+      x: bossSpawnPoint.x,
+      y: bossSpawnPoint.y,
+      color: '#ff2222',
+      isMain: false,
+      hp: 20 + Math.floor(this.gameState.getCurrentWave() / 5) * 10, // Boss mạnh dần
+      score: 0,
+      energy: 0,
+      maxEnergy: 5,
+    });
+    this.players.push(boss);
+    this.respawnTimers.push(0);
+    this.botMoveTimers.push(Math.random() * 2000 + 1000);
+    this.botShootTimers.push(Math.random() * 1500 + 800);
+    this.respawnTexts.push(null);
   }
 
   private spawnBot() {
@@ -169,21 +198,22 @@ export class PlayerManager {
   public updateBotMovement(delta: number) {
     const currentWave = this.gameState.getCurrentWave();
     const speedMultiplier = BASE_BOT_SPEED + (currentWave - 1) * BOT_SPEED_INCREASE_PER_WAVE;
-
+    const mainPlayer = this.players[0];
     for (let i = 1; i < this.players.length; i++) {
       const bot = this.players[i];
       if (this.respawnTimers[i] > 0) continue;
-
-      // Di chuyển ngẫu nhiên
+      if (bot instanceof BossBot) {
+        // BossBot dùng AI riêng
+        bot.updateAI(mainPlayer, delta, null); // bulletManager sẽ truyền ở updateBotShooting
+        continue;
+      }
+      // Bot thường
       this.botMoveTimers[i] -= delta;
       if (this.botMoveTimers[i] <= 0) {
-        // Chọn hướng mới
         const angle = Math.random() * Math.PI * 2;
         bot.data._moveDir = { x: Math.cos(angle), y: Math.sin(angle) };
         this.botMoveTimers[i] = Math.random() * 2000 + 1000;
       }
-
-      // Di chuyển bot với tốc độ tăng theo wave
       if (bot.data._moveDir) {
         const speed = PLAYER_SPEED * speedMultiplier;
         const newX = Math.max(
@@ -194,7 +224,6 @@ export class PlayerManager {
           PLAYER_RADIUS,
           Math.min(600 - PLAYER_RADIUS, bot.data.y + bot.data._moveDir.y * speed * (delta / 1000))
         );
-
         if (!this.gameWorld.isCollidingWithObstacle(newX, newY, PLAYER_RADIUS)) {
           bot.setPosition(newX, newY);
         }
@@ -206,16 +235,19 @@ export class PlayerManager {
     const currentWave = this.gameState.getCurrentWave();
     const shootRateMultiplier = 1 - (currentWave - 1) * BOT_SHOOT_RATE_INCREASE_PER_WAVE;
     const baseInterval = BASE_BOT_SHOOT_INTERVAL * shootRateMultiplier;
-
+    const mainPlayer = this.players[0];
     for (let i = 1; i < this.players.length; i++) {
       const bot = this.players[i];
       if (this.respawnTimers[i] > 0) continue;
-
-      // Bắn về phía player chính với tốc độ tăng theo wave
+      if (bot instanceof BossBot) {
+        // BossBot dùng AI riêng (truyền bulletManager)
+        bot.updateAI(mainPlayer, delta, bulletManager);
+        continue;
+      }
+      // Bot thường
       this.botShootTimers[i] -= delta;
       if (this.botShootTimers[i] <= 0) {
-        const player = this.players[0];
-        bulletManager.shootBotBullet(bot, player);
+        bulletManager.shootBotBullet(bot, mainPlayer);
         this.botShootTimers[i] = Math.random() * baseInterval * 0.5 + baseInterval * 0.5;
       }
     }

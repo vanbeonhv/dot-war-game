@@ -8,9 +8,12 @@ export class GameUI {
   private survivalTimer!: Phaser.GameObjects.Text;
   private waveInfoText!: Phaser.GameObjects.Text;
   private waveProgressBar!: Phaser.GameObjects.Graphics;
+  private bossHealthBar!: Phaser.GameObjects.Graphics;
+  private bossHealthText!: Phaser.GameObjects.Text;
   private pauseMenu!: Phaser.GameObjects.Container;
   private youLineText?: Phaser.GameObjects.Text;
   private highScore: number = 0;
+  private isBossActive: boolean = false;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -22,6 +25,7 @@ export class GameUI {
     this.createLeaderboard();
     this.createSurvivalTimer();
     this.createWaveInfo();
+    this.createBossHealthBar();
     this.createPauseMenu();
   }
 
@@ -58,6 +62,22 @@ export class GameUI {
     // Create wave progress bar
     this.waveProgressBar = this.scene.add.graphics();
     this.waveProgressBar.setDepth(100);
+  }
+
+  private createBossHealthBar() {
+    this.bossHealthBar = this.scene.add.graphics();
+    this.bossHealthBar.setDepth(100);
+
+    this.bossHealthText = this.scene.add.text(400, 15, '', {
+      font: 'bold 20px Arial',
+      color: '#ff2222',
+      stroke: '#000',
+      strokeThickness: 3,
+    });
+    this.bossHealthText.setOrigin(0.5);
+    this.bossHealthText.setDepth(100);
+
+    this.hideBossHealthBar();
   }
 
   private createPauseMenu() {
@@ -215,12 +235,62 @@ export class GameUI {
     restartText.setDepth(200);
   }
 
+  public showBossHealthBar(bossHP: number, maxHP: number) {
+    this.isBossActive = true;
+    this.bossHealthBar.setVisible(true);
+    this.bossHealthText.setVisible(true);
+    this.updateBossHealthBar(bossHP, maxHP);
+  }
+
+  public hideBossHealthBar() {
+    this.isBossActive = false;
+    this.bossHealthBar.setVisible(false);
+    this.bossHealthText.setVisible(false);
+  }
+
+  public updateBossHealthBar(bossHP: number, maxHP: number) {
+    if (!this.isBossActive) return;
+
+    const barWidth = 300;
+    const barHeight = 20;
+    const x = 400 - barWidth / 2;
+    const y = 10;
+
+    // Clear previous bar
+    this.bossHealthBar.clear();
+
+    // Background
+    this.bossHealthBar.fillStyle(0x333333, 0.8);
+    this.bossHealthBar.fillRect(x, y, barWidth, barHeight);
+
+    // Health bar
+    const hpPercent = Math.max(0, bossHP) / maxHP;
+    let healthColor = 0x00ff00; // Green
+    if (hpPercent < 0.3) {
+      healthColor = 0xff0000; // Red
+    } else if (hpPercent < 0.6) {
+      healthColor = 0xffff00; // Yellow
+    }
+
+    this.bossHealthBar.fillStyle(healthColor, 1);
+    this.bossHealthBar.fillRect(x, y, barWidth * hpPercent, barHeight);
+
+    // Border
+    this.bossHealthBar.lineStyle(3, 0xff2222, 1);
+    this.bossHealthBar.strokeRect(x, y, barWidth, barHeight);
+
+    // Text
+    this.bossHealthText.setText(`BOSS HP: ${bossHP}/${maxHP}`);
+  }
+
   public destroy() {
     // Clean up UI elements
     if (this.leaderboardText) this.leaderboardText.destroy();
     if (this.survivalTimer) this.survivalTimer.destroy();
     if (this.waveInfoText) this.waveInfoText.destroy();
     if (this.waveProgressBar) this.waveProgressBar.destroy();
+    if (this.bossHealthBar) this.bossHealthBar.destroy();
+    if (this.bossHealthText) this.bossHealthText.destroy();
     if (this.pauseMenu) this.pauseMenu.destroy();
     if (this.youLineText) this.youLineText.destroy();
   }
