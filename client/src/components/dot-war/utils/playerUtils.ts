@@ -120,6 +120,14 @@ export function handlePlayerHit(player: Player, respawnTimers: any[], playerInde
       respawnTimers[playerIndex] = 3000;
       player.setVisible(false);
       player.setAlpha(0.5);
+
+      // Chỉ hiển thị respawn text cho player chính
+      if (playerIndex === 0) {
+        // Player chính - hiển thị respawn text
+        // Logic này sẽ được xử lý trong BulletManager
+      } else {
+        // Bot - không hiển thị respawn text, sẽ bị xóa hoàn toàn
+      }
     }
   }
   return wasDamaged;

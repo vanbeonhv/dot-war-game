@@ -5,3 +5,15 @@ export const BULLET_SPEED = 400;
 export const BULLET_RADIUS = 5;
 export const RESPAWN_TIME = 3000;
 export const NUM_FAKE_PLAYERS = 5;
+
+// Wave System Constants
+export const INITIAL_BOT_COUNT = 3; // Bots at wave 1
+export const BOT_INCREASE_PER_WAVE = 2; // Additional bots per wave
+export const MAX_BOTS_ON_SCREEN = 15; // Maximum bots allowed
+export const WAVE_BREAK_TIME = 3 * 1000; // 3 seconds break between waves
+
+// Difficulty Scaling
+export const BOT_SPEED_INCREASE_PER_WAVE = 0.1; // 10% speed increase per wave
+export const BOT_SHOOT_RATE_INCREASE_PER_WAVE = 0.15; // 15% faster shooting per wave
+export const BASE_BOT_SPEED = 0.6; // Base bot speed multiplier
+export const BASE_BOT_SHOOT_INTERVAL = 1500; // Base shoot interval in ms

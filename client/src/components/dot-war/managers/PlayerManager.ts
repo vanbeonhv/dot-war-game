@@ -1,6 +1,18 @@
 import type Phaser from 'phaser';
-import { NUM_FAKE_PLAYERS, PLAYER_COLORS, PLAYER_RADIUS, PLAYER_SPEED } from '../constants/constants';
+import {
+  BASE_BOT_SHOOT_INTERVAL,
+  BASE_BOT_SPEED,
+  BOT_INCREASE_PER_WAVE,
+  BOT_SHOOT_RATE_INCREASE_PER_WAVE,
+  BOT_SPEED_INCREASE_PER_WAVE,
+  INITIAL_BOT_COUNT,
+  MAX_BOTS_ON_SCREEN,
+  PLAYER_COLORS,
+  PLAYER_RADIUS,
+  PLAYER_SPEED,
+} from '../constants/constants';
 import { Player } from '../entities/Player';
+import type { GameState } from '../utils/GameState';
 import { respawnPlayer } from '../utils/playerUtils';
 import type { GameWorld } from './GameWorld';
 
@@ -12,10 +24,14 @@ export class PlayerManager {
   private botMoveTimers: number[] = [];
   private botShootTimers: number[] = [];
   private gameWorld: GameWorld;
+  private gameState: GameState;
+  private currentBotCount: number = 0;
+  private botIdCounter: number = 0;
 
-  constructor(scene: Phaser.Scene, gameWorld: GameWorld) {
+  constructor(scene: Phaser.Scene, gameWorld: GameWorld, gameState: GameState) {
     this.scene = scene;
     this.gameWorld = gameWorld;
+    this.gameState = gameState;
     this.initializePlayers();
   }
 
@@ -23,7 +39,7 @@ export class PlayerManager {
     // Tạo vị trí spawn ngẫu nhiên cho player chính
     const mainSpawnPoint = this.gameWorld.getRandomSpawnPoint();
 
-    // Tạo players với vị trí spawn đã định sẵn
+    // Tạo player chính
     this.players = [
       new Player(this.scene, {
         id: 'me',
@@ -36,27 +52,79 @@ export class PlayerManager {
         energy: 0,
         maxEnergy: 5,
       }),
-      ...Array.from({ length: NUM_FAKE_PLAYERS }).map((_, i) => {
-        // Tạo vị trí spawn ngẫu nhiên cho mỗi bot
-        const botSpawnPoint = this.gameWorld.getRandomSpawnPoint();
-        return new Player(this.scene, {
-          id: `bot_${i}`,
-          name: `bot_${i}`,
-          x: botSpawnPoint.x,
-          y: botSpawnPoint.y,
-          color: PLAYER_COLORS[(i + 1) % PLAYER_COLORS.length],
-          isMain: false,
-          hp: 3,
-          score: 0,
-          energy: 0,
-          maxEnergy: 5,
-        });
-      }),
     ];
 
-    this.respawnTimers = this.players.map(() => 0);
-    this.botMoveTimers = this.players.map((_, i) => (i === 0 ? 0 : Math.random() * 2000 + 1000));
-    this.botShootTimers = this.players.map((_, i) => (i === 0 ? 0 : Math.random() * 1500 + 800));
+    this.respawnTimers = [0];
+    this.botMoveTimers = [0];
+    this.botShootTimers = [0];
+  }
+
+  private spawnWaveBots() {
+    const currentWave = this.gameState.getCurrentWave();
+    const targetBotCount = Math.min(MAX_BOTS_ON_SCREEN, INITIAL_BOT_COUNT + (currentWave - 1) * BOT_INCREASE_PER_WAVE);
+
+    // Xóa tất cả bot cũ (trừ player chính)
+    for (let i = this.players.length - 1; i > 0; i--) {
+      this.players[i].destroy();
+      this.players.splice(i, 1);
+      this.respawnTimers.splice(i, 1);
+      this.botMoveTimers.splice(i, 1);
+      this.botShootTimers.splice(i, 1);
+      this.respawnTexts[i]?.destroy();
+      this.respawnTexts.splice(i, 1);
+    }
+
+    // Spawn bot mới
+    for (let i = 0; i < targetBotCount; i++) {
+      this.spawnBot();
+    }
+
+    this.currentBotCount = targetBotCount;
+  }
+
+  private spawnBot() {
+    const botSpawnPoint = this.gameWorld.getRandomSpawnPoint();
+    const botIndex = this.players.length;
+    const colorIndex = botIndex % PLAYER_COLORS.length;
+
+    const bot = new Player(this.scene, {
+      id: `bot_${this.botIdCounter++}`,
+      name: `bot_${this.botIdCounter}`,
+      x: botSpawnPoint.x,
+      y: botSpawnPoint.y,
+      color: PLAYER_COLORS[colorIndex],
+      isMain: false,
+      hp: 3,
+      score: 0,
+      energy: 0,
+      maxEnergy: 5,
+    });
+
+    this.players.push(bot);
+    this.respawnTimers.push(0);
+    this.botMoveTimers.push(Math.random() * 2000 + 1000);
+    this.botShootTimers.push(Math.random() * 1500 + 800);
+    this.respawnTexts.push(null);
+  }
+
+  public updateWaveSystem() {
+    if (this.gameState.isWaveBreakActive()) {
+      // Trong wave break, không spawn bot mới
+      return;
+    }
+
+    // Kiểm tra nếu đã giết hết bot trong wave hiện tại
+    const aliveBots = this.players.filter((_p, i) => i > 0 && this.respawnTimers[i] <= 0).length;
+
+    if (aliveBots === 0) {
+      // Tất cả bot đã chết - kết thúc wave
+      this.gameState.endCurrentWave();
+    }
+  }
+
+  public onWaveStart() {
+    // Spawn bots cho wave mới
+    this.spawnWaveBots();
   }
 
   public getPlayers(): Player[] {
@@ -99,6 +167,9 @@ export class PlayerManager {
   }
 
   public updateBotMovement(delta: number) {
+    const currentWave = this.gameState.getCurrentWave();
+    const speedMultiplier = BASE_BOT_SPEED + (currentWave - 1) * BOT_SPEED_INCREASE_PER_WAVE;
+
     for (let i = 1; i < this.players.length; i++) {
       const bot = this.players[i];
       if (this.respawnTimers[i] > 0) continue;
@@ -112,9 +183,9 @@ export class PlayerManager {
         this.botMoveTimers[i] = Math.random() * 2000 + 1000;
       }
 
-      // Di chuyển bot
+      // Di chuyển bot với tốc độ tăng theo wave
       if (bot.data._moveDir) {
-        const speed = PLAYER_SPEED * 0.6;
+        const speed = PLAYER_SPEED * speedMultiplier;
         const newX = Math.max(
           PLAYER_RADIUS,
           Math.min(800 - PLAYER_RADIUS, bot.data.x + bot.data._moveDir.x * speed * (delta / 1000))
@@ -132,16 +203,20 @@ export class PlayerManager {
   }
 
   public updateBotShooting(delta: number, bulletManager: any) {
+    const currentWave = this.gameState.getCurrentWave();
+    const shootRateMultiplier = 1 - (currentWave - 1) * BOT_SHOOT_RATE_INCREASE_PER_WAVE;
+    const baseInterval = BASE_BOT_SHOOT_INTERVAL * shootRateMultiplier;
+
     for (let i = 1; i < this.players.length; i++) {
       const bot = this.players[i];
       if (this.respawnTimers[i] > 0) continue;
 
-      // Bắn về phía player chính
+      // Bắn về phía player chính với tốc độ tăng theo wave
       this.botShootTimers[i] -= delta;
       if (this.botShootTimers[i] <= 0) {
         const player = this.players[0];
         bulletManager.shootBotBullet(bot, player);
-        this.botShootTimers[i] = Math.random() * 1500 + 800;
+        this.botShootTimers[i] = Math.random() * baseInterval * 0.5 + baseInterval * 0.5;
       }
     }
   }
@@ -155,12 +230,30 @@ export class PlayerManager {
           this.respawnTexts[i]?.setText(secondsLeft.toString());
         }
         if (this.respawnTimers[i] <= 0) {
-          // Tạo vị trí spawn ngẫu nhiên khi respawn
-          const spawnPoint = this.gameWorld.getRandomSpawnPoint();
-          respawnPlayer(this.players, this.respawnTimers, this.respawnTexts, this.scene.tweens, i, () => spawnPoint);
+          if (i === 0) {
+            // Player chính respawn bình thường
+            const spawnPoint = this.gameWorld.getRandomSpawnPoint();
+            respawnPlayer(this.players, this.respawnTimers, this.respawnTexts, this.scene.tweens, i, () => spawnPoint);
+          } else {
+            // Bot chết - xóa bot và không respawn
+            this.removeDeadBot(i);
+          }
         }
       }
     }
+  }
+
+  private removeDeadBot(botIndex: number) {
+    // Xóa bot chết
+    this.players[botIndex].destroy();
+    this.players.splice(botIndex, 1);
+    this.respawnTimers.splice(botIndex, 1);
+    this.botMoveTimers.splice(botIndex, 1);
+    this.botShootTimers.splice(botIndex, 1);
+    this.respawnTexts[botIndex]?.destroy();
+    this.respawnTexts.splice(botIndex, 1);
+
+    // Không spawn bot mới - để wave system kiểm tra
   }
 
   public updateGunDirections(pointer: Phaser.Input.Pointer) {
@@ -183,5 +276,7 @@ export class PlayerManager {
     this.respawnTexts = [];
     this.botMoveTimers = [];
     this.botShootTimers = [];
+    this.currentBotCount = 0;
+    this.botIdCounter = 0;
   }
 }

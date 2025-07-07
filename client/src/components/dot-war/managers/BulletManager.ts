@@ -126,11 +126,18 @@ export class BulletManager {
 
             // Set respawn timer
             respawnTimers[j] = RESPAWN_TIME;
-            const countdownText = this.scene.add.text(player.data.x - 30, player.data.y - 10, '3', {
-              font: '24px Arial',
-              color: '#ff0000',
-            });
-            respawnTexts[j] = countdownText;
+
+            // Chỉ tạo respawn text cho player chính
+            if (player.data.id === 'me') {
+              const countdownText = this.scene.add.text(player.data.x - 30, player.data.y - 10, '3', {
+                font: '24px Arial',
+                color: '#ff0000',
+              });
+              respawnTexts[j] = countdownText;
+            } else {
+              // Bot - không tạo respawn text
+              respawnTexts[j] = null;
+            }
 
             // Handle main player death in survival mode
             if (player.data.id === 'me') {

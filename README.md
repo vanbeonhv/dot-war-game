@@ -93,15 +93,15 @@ https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65
 
 #### 6.1 Core Survival Mechanics
 - [x] Hệ thống thời gian sống sót (timer countdown)
-- [ ] Wave system: mỗi wave tăng độ khó
+- [x] Wave system: mỗi wave tăng độ khó, bot chỉ spawn 1 lần đầu wave, giết hết bot mới qua wave mới
 - [x] Mục tiêu rõ ràng: "Sống sót X phút" hoặc "Vượt qua X wave"
 - [x] Game over screen với thống kê (thời gian sống, điểm số, wave đạt được)
 - [ ] High score system cho survival mode
 
 #### 6.2 Progressive Difficulty
-- [ ] Bot spawn nhiều hơn theo thời gian
-- [ ] Bot di chuyển nhanh hơn ở wave cao
-- [ ] Bot bắn nhanh hơn và chính xác hơn
+- [x] Bot spawn nhiều hơn theo wave (3, 5, 7, ...)
+- [x] Bot di chuyển nhanh hơn ở wave cao
+- [x] Bot bắn nhanh hơn và chính xác hơn
 - [ ] Bot có thể dùng ultimate skill ở wave cao
 - [ ] Boss bot xuất hiện cuối mỗi 5 wave
 
@@ -141,3 +141,14 @@ https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65
 - [ ] Implement proper game modes system
 - [ ] Add configuration system cho difficulty
 - [ ] Performance optimization cho nhiều bot
+
+---
+
+### 🆕 **Mô tả Survival Mode (Wave System mới)**
+
+- Mỗi wave sẽ spawn số lượng bot cố định (Wave 1: 3 bot, Wave 2: 5 bot, Wave 3: 7 bot, ...)
+- Bot chỉ spawn 1 lần đầu wave, **bot chết sẽ không respawn**
+- Khi giết hết toàn bộ bot của wave hiện tại, sẽ có 3 giây nghỉ (break) rồi mới sang wave tiếp theo
+- Wave sau sẽ tăng số lượng bot, tốc độ di chuyển và tốc độ bắn của bot cũng tăng dần
+- UI hiển thị số bot còn lại, wave hiện tại, và tiến độ tiêu diệt bot
+- Mục tiêu: sống sót càng lâu, vượt qua càng nhiều wave càng tốt!

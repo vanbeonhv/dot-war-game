@@ -29,7 +29,13 @@ export default class GameScene extends Phaser.Scene {
     // Initialize all managers
     this.gameState = new GameState();
     this.gameWorld = new GameWorld(this);
-    this.playerManager = new PlayerManager(this, this.gameWorld);
+
+    // Setup wave callback before initializing PlayerManager
+    this.gameState.setOnWaveStartCallback((_wave: number) => {
+      this.playerManager.onWaveStart();
+    });
+
+    this.playerManager = new PlayerManager(this, this.gameWorld, this.gameState);
     this.bulletManager = new BulletManager(this, this.gameWorld, this.playerManager);
     this.gameInput = new GameInput(this);
     this.gameUI = new GameUI(this);
@@ -38,6 +44,10 @@ export default class GameScene extends Phaser.Scene {
     this.powerUpManager = new PowerUpManager(this, (x, y, radius) =>
       this.gameWorld.isCollidingWithObstacle(x, y, radius)
     );
+
+    // Start first wave
+    this.gameState.startFirstWave();
+    this.playerManager.onWaveStart();
 
     // Setup input handlers
     this.setupInputHandlers();
@@ -66,10 +76,25 @@ export default class GameScene extends Phaser.Scene {
       return;
     }
 
-    // Update survival timer
+    // Update survival timer and wave system
     if (!this.gameState.isGameOver() && this.playerManager.getRespawnTimers()[0] <= 0) {
       this.gameState.updateSurvivalTime(delta);
       this.gameUI.updateSurvivalTimer(this.gameState.getSurvivalTime(), this.gameState.getSurvivalTarget());
+
+      // Update wave system
+      this.playerManager.updateWaveSystem();
+
+      // Update wave UI
+      const aliveBots = this.playerManager
+        .getPlayers()
+        .filter((_p, i) => i > 0 && this.playerManager.getRespawnTimers()[i] <= 0).length;
+      this.gameUI.updateWaveInfo(
+        this.gameState.getCurrentWave(),
+        this.gameState.getWaveProgress(),
+        this.gameState.isWaveBreakActive(),
+        this.gameState.getWaveBreakTimeLeft(),
+        aliveBots
+      );
 
       // Check if target reached
       if (this.gameState.isSurvivalTargetReached()) {

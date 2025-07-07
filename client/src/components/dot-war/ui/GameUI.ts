@@ -6,6 +6,8 @@ export class GameUI {
   private scene: Phaser.Scene;
   private leaderboardText!: Phaser.GameObjects.Text;
   private survivalTimer!: Phaser.GameObjects.Text;
+  private waveInfoText!: Phaser.GameObjects.Text;
+  private waveProgressBar!: Phaser.GameObjects.Graphics;
   private pauseMenu!: Phaser.GameObjects.Container;
   private youLineText?: Phaser.GameObjects.Text;
   private highScore: number = 0;
@@ -19,6 +21,7 @@ export class GameUI {
   private initializeUI() {
     this.createLeaderboard();
     this.createSurvivalTimer();
+    this.createWaveInfo();
     this.createPauseMenu();
   }
 
@@ -42,6 +45,19 @@ export class GameUI {
       fontStyle: 'bold',
     });
     this.survivalTimer.setDepth(100);
+  }
+
+  private createWaveInfo() {
+    this.waveInfoText = this.scene.add.text(20, 60, 'Wave: 1', {
+      font: '20px Arial',
+      color: '#ffff00',
+      fontStyle: 'bold',
+    });
+    this.waveInfoText.setDepth(100);
+
+    // Create wave progress bar
+    this.waveProgressBar = this.scene.add.graphics();
+    this.waveProgressBar.setDepth(100);
   }
 
   private createPauseMenu() {
@@ -82,6 +98,45 @@ export class GameUI {
 
     this.survivalTimer.setText(`Survival Time: ${timeString}`);
     this.survivalTimer.setColor(color);
+  }
+
+  public updateWaveInfo(
+    currentWave: number,
+    waveProgress: number,
+    isWaveBreak: boolean,
+    waveBreakTimeLeft: number,
+    aliveBots: number
+  ) {
+    // Update wave text
+    if (isWaveBreak) {
+      const breakSeconds = Math.ceil(waveBreakTimeLeft / 1000);
+      this.waveInfoText.setText(`Wave ${currentWave} Complete! Next wave in ${breakSeconds}s`);
+      this.waveInfoText.setColor('#00ffff');
+    } else {
+      this.waveInfoText.setText(`Wave: ${currentWave} - Bots: ${aliveBots}`);
+      this.waveInfoText.setColor('#ffff00');
+    }
+
+    // Update progress bar - hiển thị số bot còn lại
+    this.waveProgressBar.clear();
+
+    if (!isWaveBreak) {
+      // Draw progress bar background
+      this.waveProgressBar.fillStyle(0x333333, 0.8);
+      this.waveProgressBar.fillRect(20, 85, 200, 10);
+
+      // Draw progress bar fill based on bots remaining
+      const currentWave = Math.floor(waveProgress * 10) + 1; // Estimate current wave
+      const targetBotCount = Math.min(15, 3 + (currentWave - 1) * 2);
+      const progress = aliveBots / targetBotCount;
+      const progressColor = progress < 0.3 ? 0xff0000 : progress < 0.6 ? 0xffff00 : 0x00ff00;
+      this.waveProgressBar.fillStyle(progressColor, 1);
+      this.waveProgressBar.fillRect(20, 85, 200 * (1 - progress), 10);
+
+      // Draw progress bar border
+      this.waveProgressBar.lineStyle(2, 0xffffff, 1);
+      this.waveProgressBar.strokeRect(20, 85, 200, 10);
+    }
   }
 
   public updateLeaderboard(players: Player[]) {
@@ -164,6 +219,8 @@ export class GameUI {
     // Clean up UI elements
     if (this.leaderboardText) this.leaderboardText.destroy();
     if (this.survivalTimer) this.survivalTimer.destroy();
+    if (this.waveInfoText) this.waveInfoText.destroy();
+    if (this.waveProgressBar) this.waveProgressBar.destroy();
     if (this.pauseMenu) this.pauseMenu.destroy();
     if (this.youLineText) this.youLineText.destroy();
   }
