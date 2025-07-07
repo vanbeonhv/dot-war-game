@@ -122,10 +122,11 @@ export class GameUI {
 
   public updateWaveInfo(
     currentWave: number,
-    waveProgress: number,
+    _waveProgress: number,
     isWaveBreak: boolean,
     waveBreakTimeLeft: number,
-    aliveBots: number
+    aliveBots: number,
+    targetBotCount: number
   ) {
     // Update wave text
     if (isWaveBreak) {
@@ -146,8 +147,6 @@ export class GameUI {
       this.waveProgressBar.fillRect(20, 85, 200, 10);
 
       // Draw progress bar fill based on bots remaining
-      const currentWave = Math.floor(waveProgress * 10) + 1; // Estimate current wave
-      const targetBotCount = Math.min(15, 3 + (currentWave - 1) * 2);
       const progress = aliveBots / targetBotCount;
       const progressColor = progress < 0.3 ? 0xff0000 : progress < 0.6 ? 0xffff00 : 0x00ff00;
       this.waveProgressBar.fillStyle(progressColor, 1);

@@ -93,7 +93,8 @@ export default class GameScene extends Phaser.Scene {
         this.gameState.getWaveProgress(),
         this.gameState.isWaveBreakActive(),
         this.gameState.getWaveBreakTimeLeft(),
-        aliveBots
+        aliveBots,
+        this.playerManager.getCurrentBotCount()
       );
 
       // Update boss health bar

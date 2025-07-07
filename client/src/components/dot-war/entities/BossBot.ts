@@ -193,4 +193,29 @@ export class BossBot extends Player {
     if (this.outline) this.outline.destroy();
     if (this.particleEmitter) this.particleEmitter.destroy();
   }
+
+  override drawHealthBar() {
+    this.healthBar.clear();
+    const barWidth = 80; // Thanh máu boss dài hơn
+    const barHeight = 8;
+    const x = this.data.x - barWidth / 2;
+    const y = this.data.y - 60; // Cao hơn đầu boss
+    // Background máu
+    this.healthBar.fillStyle(0x333333, 1);
+    this.healthBar.fillRect(x, y, barWidth, barHeight);
+    // HP
+    const hpPercent = Math.max(0, this.data.hp) / (this.data.maxHp ?? 20);
+    this.healthBar.fillStyle(0xff2222, 1);
+    this.healthBar.fillRect(x, y, barWidth * hpPercent, barHeight);
+    // Border máu
+    this.healthBar.lineStyle(2, 0xffffff, 1);
+    this.healthBar.strokeRect(x, y, barWidth, barHeight);
+  }
+
+  override setPosition(x: number, y: number) {
+    super.setPosition(x, y);
+    if (this.outline) {
+      this.outline.setPosition(x, y);
+    }
+  }
 }

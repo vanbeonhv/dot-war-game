@@ -319,4 +319,8 @@ export class PlayerManager {
     this.currentBotCount = 0;
     this.botIdCounter = 0;
   }
+
+  public getCurrentBotCount(): number {
+    return this.currentBotCount;
+  }
 }
