@@ -323,4 +323,8 @@ export class PlayerManager {
   public getCurrentBotCount(): number {
     return this.currentBotCount;
   }
+
+  public getCurrentWave(): number {
+    return this.gameState.getCurrentWave();
+  }
 }

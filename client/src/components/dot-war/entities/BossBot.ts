@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import type { PlayerData } from '../types/types';
+import { Bullet } from './Bullet';
 import { Player } from './Player';
 
 export class BossBot extends Player {
@@ -103,7 +104,12 @@ export class BossBot extends Player {
     this.ultimateTimer -= delta;
     const currentEnergy = this.data.energy ?? 0;
     const maxEnergy = this.data.maxEnergy ?? 5;
-    if (this.ultimateTimer <= 0 && currentEnergy >= maxEnergy) {
+    if (
+      this.ultimateTimer <= 0 &&
+      currentEnergy >= maxEnergy &&
+      bulletManager &&
+      typeof bulletManager.getBullets === 'function'
+    ) {
       this.activateUltimate(targetPlayer, bulletManager);
       this.ultimateTimer = 5000 + Math.random() * 3000; // Dùng ultimate mỗi 5-8 giây
     }
@@ -111,7 +117,70 @@ export class BossBot extends Player {
     // Bắn thường về phía player chính
     this.shootTimer -= delta;
     if (this.shootTimer <= 0 && bulletManager && typeof bulletManager.shootBotBullet === 'function') {
-      bulletManager.shootBotBullet(this, targetPlayer);
+      // Lấy current wave từ bulletManager (nếu có)
+      const currentWave = bulletManager.playerManager?.getCurrentWave?.() || 1;
+
+      // Chỉ áp dụng pattern mới từ wave 5 trở đi
+      if (currentWave >= 5) {
+        // Boss có nhiều pattern bắn đạn khác nhau
+        const pattern = Math.floor(Math.random() * 5); // 0-4: 5 pattern khác nhau
+
+        switch (pattern) {
+          case 0: // Pattern 1: Bắn thẳng với độ lệch lớn
+            this.shootBossStraight(targetPlayer, bulletManager, Math.PI / 3); // ±30 độ
+            break;
+          case 1: // Pattern 2: Bắn 4 viên spread
+            this.shootBossSpread(targetPlayer, bulletManager, 4, Math.PI / 2); // 4 viên ±45 độ
+            break;
+          case 2: // Pattern 3: Bắn 3 viên song song
+            this.shootBossParallel(targetPlayer, bulletManager, 3);
+            break;
+          case 3: // Pattern 4: Bắn với độ lệch ngẫu nhiên
+            this.shootBossRandom(targetPlayer, bulletManager);
+            break;
+          case 4: // Pattern 5: Bắn 2 viên với tốc độ khác nhau
+            this.shootBossDualSpeed(targetPlayer, bulletManager);
+            break;
+        }
+      } else {
+        // Wave 1-4: Boss bắn đơn giản với độ lệch nhỏ
+        const dx = targetPlayer.data.x - this.data.x;
+        const dy = targetPlayer.data.y - this.data.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance > 0) {
+          const normalizedDx = dx / distance;
+          const normalizedDy = dy / distance;
+
+          const baseAngle = Math.atan2(normalizedDy, normalizedDx);
+          const randomSpread = ((Math.random() - 0.5) * Math.PI) / 8; // ±11 độ (nhỏ hơn)
+          const finalAngle = baseAngle + randomSpread;
+
+          const finalDx = Math.cos(finalAngle);
+          const finalDy = Math.sin(finalAngle);
+
+          const bulletData = {
+            x: this.data.x + finalDx * 34,
+            y: this.data.y + finalDy * 34,
+            dx: finalDx * 400,
+            dy: finalDy * 400,
+            life: 3000,
+            ownerId: this.data.id,
+            isBossBullet: true,
+          };
+
+          const bullet = new Bullet(this.scene, bulletData);
+          if (bullet?.sprite) {
+            bullet.sprite.setFillStyle(0xff2222);
+            bullet.sprite.setScale(1.3);
+          }
+
+          // Kiểm tra bulletManager trước khi gọi getBullets
+          if (bulletManager && typeof bulletManager.getBullets === 'function') {
+            bulletManager.getBullets().push(bullet);
+          }
+        }
+      }
+
       this.shootTimer = 400 + Math.random() * 200; // Boss bắn nhanh hơn bot thường
     }
     // Hướng súng về phía player
@@ -119,7 +188,7 @@ export class BossBot extends Player {
   }
 
   private activateUltimate(targetPlayer: Player, bulletManager: any) {
-    // Boss dùng ultimate: bắn spread shot
+    // Boss dùng ultimate: bắn spread shot với độ lệch ngẫu nhiên
     this.data.energy = 0;
     this.flashGunEffect();
 
@@ -129,34 +198,40 @@ export class BossBot extends Player {
     const dx = targetPlayer.data.x - this.data.x;
     const dy = targetPlayer.data.y - this.data.y;
     const baseAngle = Math.atan2(dy, dx);
-    const spread = Math.PI / 3; // ±60 độ
-    const numBullets = 8;
+    const spread = Math.PI / 2; // ±90 độ (tăng spread)
+    const numBullets = 10; // Tăng số đạn
 
     for (let i = 0; i < numBullets; i++) {
       const t = i / (numBullets - 1);
       const angle = baseAngle - spread / 2 + t * spread;
-      const bulletX = this.data.x + Math.cos(angle) * 34; // PLAYER_RADIUS * 1.7
-      const bulletY = this.data.y + Math.sin(angle) * 34;
+
+      // Thêm độ lệch ngẫu nhiên cho từng đạn
+      const randomSpread = ((Math.random() - 0.5) * Math.PI) / 6; // ±15 độ
+      const finalAngle = angle + randomSpread;
+
+      const bulletX = this.data.x + Math.cos(finalAngle) * 34; // PLAYER_RADIUS * 1.7
+      const bulletY = this.data.y + Math.sin(finalAngle) * 34;
 
       // Tạo bullet đặc biệt cho boss
       const bulletData = {
         x: bulletX,
         y: bulletY,
-        dx: Math.cos(angle) * 500, // BULLET_SPEED * 1.25
-        dy: Math.sin(angle) * 500,
+        dx: Math.cos(finalAngle) * 500, // BULLET_SPEED * 1.25
+        dy: Math.sin(finalAngle) * 500,
         life: 4000, // Sống lâu hơn
         ownerId: this.data.id,
         isBossBullet: true,
       };
 
-      // Tạo bullet với màu đặc biệt
-      if (bulletManager && typeof bulletManager.createBullet === 'function') {
-        const bullet = bulletManager.createBullet(bulletData);
-        if (bullet?.sprite) {
-          bullet.sprite.setFillStyle(0xff2222); // Màu đỏ boss
-          bullet.sprite.setScale(1.5); // Bullet lớn hơn
-        }
+      // Tạo bullet trực tiếp
+      const bullet = new Bullet(this.scene, bulletData);
+      if (bullet?.sprite) {
+        bullet.sprite.setFillStyle(0xff2222); // Màu đỏ boss
+        bullet.sprite.setScale(1.5); // Bullet lớn hơn
       }
+
+      // Thêm vào bulletManager
+      bulletManager.getBullets().push(bullet);
     }
   }
 
@@ -184,6 +259,179 @@ export class BossBot extends Player {
         duration: 100,
         yoyo: true,
         repeat: 3,
+      });
+    }
+  }
+
+  // Các method bắn đạn cho boss
+  private shootBossStraight(targetPlayer: Player, bulletManager: any, spread: number) {
+    const dx = targetPlayer.data.x - this.data.x;
+    const dy = targetPlayer.data.y - this.data.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance > 0) {
+      const normalizedDx = dx / distance;
+      const normalizedDy = dy / distance;
+
+      const baseAngle = Math.atan2(normalizedDy, normalizedDx);
+      const randomSpread = (Math.random() - 0.5) * spread;
+      const finalAngle = baseAngle + randomSpread;
+
+      const finalDx = Math.cos(finalAngle);
+      const finalDy = Math.sin(finalAngle);
+
+      const bulletData = {
+        x: this.data.x + finalDx * 34,
+        y: this.data.y + finalDy * 34,
+        dx: finalDx * 400,
+        dy: finalDy * 400,
+        life: 3000,
+        ownerId: this.data.id,
+        isBossBullet: true,
+      };
+
+      const bullet = new Bullet(this.scene, bulletData);
+      if (bullet?.sprite) {
+        bullet.sprite.setFillStyle(0xff2222);
+        bullet.sprite.setScale(1.3);
+      }
+      // Kiểm tra bulletManager trước khi gọi getBullets
+      if (bulletManager && typeof bulletManager.getBullets === 'function') {
+        bulletManager.getBullets().push(bullet);
+      }
+    }
+  }
+
+  private shootBossSpread(targetPlayer: Player, bulletManager: any, numBullets: number, spread: number) {
+    const dx = targetPlayer.data.x - this.data.x;
+    const dy = targetPlayer.data.y - this.data.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance > 0) {
+      const normalizedDx = dx / distance;
+      const normalizedDy = dy / distance;
+      const baseAngle = Math.atan2(normalizedDy, normalizedDx);
+
+      for (let i = 0; i < numBullets; i++) {
+        const t = i / (numBullets - 1);
+        const angle = baseAngle - spread / 2 + t * spread;
+
+        const bulletData = {
+          x: this.data.x + Math.cos(angle) * 34,
+          y: this.data.y + Math.sin(angle) * 34,
+          dx: Math.cos(angle) * 400,
+          dy: Math.sin(angle) * 400,
+          life: 3000,
+          ownerId: this.data.id,
+          isBossBullet: true,
+        };
+
+        const bullet = new Bullet(this.scene, bulletData);
+        if (bullet?.sprite) {
+          bullet.sprite.setFillStyle(0xff2222);
+          bullet.sprite.setScale(1.3);
+        }
+        // Kiểm tra bulletManager trước khi gọi getBullets
+        if (bulletManager && typeof bulletManager.getBullets === 'function') {
+          bulletManager.getBullets().push(bullet);
+        }
+      }
+    }
+  }
+
+  private shootBossParallel(targetPlayer: Player, bulletManager: any, numBullets: number) {
+    const dx = targetPlayer.data.x - this.data.x;
+    const dy = targetPlayer.data.y - this.data.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance > 0) {
+      const normalizedDx = dx / distance;
+      const normalizedDy = dy / distance;
+      const baseAngle = Math.atan2(normalizedDy, normalizedDx);
+      const offset = Math.PI / 8; // 22.5 độ
+
+      for (let i = 0; i < numBullets; i++) {
+        const angle = baseAngle - offset + (i * offset * 2) / (numBullets - 1);
+
+        const bulletData = {
+          x: this.data.x + Math.cos(angle) * 34,
+          y: this.data.y + Math.sin(angle) * 34,
+          dx: Math.cos(angle) * 400,
+          dy: Math.sin(angle) * 400,
+          life: 3000,
+          ownerId: this.data.id,
+          isBossBullet: true,
+        };
+
+        const bullet = new Bullet(this.scene, bulletData);
+        if (bullet?.sprite) {
+          bullet.sprite.setFillStyle(0xff2222);
+          bullet.sprite.setScale(1.3);
+        }
+        // Kiểm tra bulletManager trước khi gọi getBullets
+        if (bulletManager && typeof bulletManager.getBullets === 'function') {
+          bulletManager.getBullets().push(bullet);
+        }
+      }
+    }
+  }
+
+  private shootBossRandom(_targetPlayer: Player, bulletManager: any) {
+    // Bắn 2 viên với hướng hoàn toàn ngẫu nhiên
+    for (let i = 0; i < 2; i++) {
+      const randomAngle = Math.random() * Math.PI * 2;
+
+      const bulletData = {
+        x: this.data.x + Math.cos(randomAngle) * 34,
+        y: this.data.y + Math.sin(randomAngle) * 34,
+        dx: Math.cos(randomAngle) * 400,
+        dy: Math.sin(randomAngle) * 400,
+        life: 3000,
+        ownerId: this.data.id,
+        isBossBullet: true,
+      };
+
+      const bullet = new Bullet(this.scene, bulletData);
+      if (bullet?.sprite) {
+        bullet.sprite.setFillStyle(0xff2222);
+        bullet.sprite.setScale(1.3);
+      }
+      // Kiểm tra bulletManager trước khi gọi getBullets
+      if (bulletManager && typeof bulletManager.getBullets === 'function') {
+        bulletManager.getBullets().push(bullet);
+      }
+    }
+  }
+
+  private shootBossDualSpeed(targetPlayer: Player, bulletManager: any) {
+    const dx = targetPlayer.data.x - this.data.x;
+    const dy = targetPlayer.data.y - this.data.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance > 0) {
+      const normalizedDx = dx / distance;
+      const normalizedDy = dy / distance;
+      const _baseAngle = Math.atan2(normalizedDy, normalizedDx);
+
+      // Bắn 2 viên với tốc độ khác nhau
+      const speeds = [300, 500]; // Chậm và nhanh
+
+      speeds.forEach((speed) => {
+        const bulletData = {
+          x: this.data.x + normalizedDx * 34,
+          y: this.data.y + normalizedDy * 34,
+          dx: normalizedDx * speed,
+          dy: normalizedDy * speed,
+          life: 3000,
+          ownerId: this.data.id,
+          isBossBullet: true,
+        };
+
+        const bullet = new Bullet(this.scene, bulletData);
+        if (bullet?.sprite) {
+          bullet.sprite.setFillStyle(0xff2222);
+          bullet.sprite.setScale(1.3);
+        }
+        // Kiểm tra bulletManager trước khi gọi getBullets
+        if (bulletManager && typeof bulletManager.getBullets === 'function') {
+          bulletManager.getBullets().push(bullet);
+        }
       });
     }
   }

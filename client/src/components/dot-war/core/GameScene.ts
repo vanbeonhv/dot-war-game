@@ -45,10 +45,6 @@ export default class GameScene extends Phaser.Scene {
       this.gameWorld.isCollidingWithObstacle(x, y, radius)
     );
 
-    // Start first wave
-    this.gameState.startFirstWave();
-    this.playerManager.onWaveStart();
-
     // Setup input handlers
     this.setupInputHandlers();
 
@@ -56,6 +52,10 @@ export default class GameScene extends Phaser.Scene {
     this.events.on('mainPlayerDeath', () => {
       this.handleSurvivalGameOver();
     });
+
+    // Start first wave - đảm bảo wave 1 có bot
+    this.gameState.startFirstWave();
+    this.playerManager.onWaveStart();
   }
 
   private setupInputHandlers() {
@@ -277,5 +277,9 @@ export default class GameScene extends Phaser.Scene {
 
     // Restart the scene
     this.scene.restart();
+
+    // Sau khi restart, sẽ gọi lại create(), cần khởi tạo wave đầu tiên
+    // (Có thể cần truyền flag hoặc custom event nếu muốn tinh chỉnh sâu hơn)
+    // Nhưng với restart scene, create() sẽ chạy lại từ đầu.
   }
 }
