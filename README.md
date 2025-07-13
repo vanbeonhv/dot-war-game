@@ -2,7 +2,7 @@
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/vanbeonhv/dot-war-game?utm_source=oss&utm_medium=github&utm_campaign=vanbeonhv%2Fdot-war-game&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 ## 🎮 Demo
 
-![game-play](assets/game-play.png)
+![game-play](assets/game-play-v2.png)
 
 [https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65](https://github.com/user-attachments/assets/338603ec-8a23-4259-9efc-178f582ea6e7)
 
