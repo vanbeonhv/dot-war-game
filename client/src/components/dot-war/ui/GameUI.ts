@@ -13,8 +13,11 @@ export class GameUI {
   private pauseMenu!: Phaser.GameObjects.Container;
   private youLineText?: Phaser.GameObjects.Text;
   private ultimateHintText?: Phaser.GameObjects.Text;
+  private healProgressText?: Phaser.GameObjects.Text;
+  private healProgressBar?: Phaser.GameObjects.Graphics;
   private highScore: number = 0;
   private isBossActive: boolean = false;
+  private lastMilestone: { value: number } = { value: 0 };
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -29,6 +32,7 @@ export class GameUI {
     this.createBossHealthBar();
     this.createPauseMenu();
     this.createUltimateHint();
+    this.createHealProgress();
   }
 
   private createLeaderboard() {
@@ -103,7 +107,7 @@ export class GameUI {
   }
 
   private createUltimateHint() {
-    this.ultimateHintText = this.scene.add.text(20, 550, 'Press Q or SPACE for Ultimate Skill', {
+    this.ultimateHintText = this.scene.add.text(20, 570, 'Press Q or SPACE for Ultimate Skill', {
       font: '16px Arial',
       color: '#ffe066',
       fontStyle: 'bold',
@@ -111,6 +115,20 @@ export class GameUI {
       strokeThickness: 2,
     });
     this.ultimateHintText.setDepth(100);
+  }
+
+  private createHealProgress() {
+    this.healProgressText = this.scene.add.text(20, 525, 'Heal Progress: 0/3', {
+      font: '16px Arial',
+      color: '#00ff00',
+      fontStyle: 'bold',
+      stroke: '#000',
+      strokeThickness: 2,
+    });
+    this.healProgressText.setDepth(100);
+
+    this.healProgressBar = this.scene.add.graphics();
+    this.healProgressBar.setDepth(100);
   }
 
   public updateSurvivalTimer(survivalTime: number, survivalTarget: number) {
@@ -172,9 +190,20 @@ export class GameUI {
   }
 
   public updateLeaderboard(players: Player[]) {
-    updateLeaderboard(players, this.leaderboardText, this.youLineText, (t) => {
-      this.youLineText = t;
-    });
+    updateLeaderboard(
+      players,
+      this.leaderboardText,
+      this.youLineText,
+      (t) => {
+        this.youLineText = t;
+      },
+      this.scene.add,
+      this.scene.tweens,
+      this.lastMilestone,
+      (milestone) => {
+        this.lastMilestone = milestone;
+      }
+    );
   }
 
   public showPauseMenu() {
@@ -308,6 +337,32 @@ export class GameUI {
     }
   }
 
+  public updateHealProgress(currentHeal: number, maxHeal: number) {
+    const barX = 20;
+    const barY = 545;
+    const barWidth = 120;
+    const barHeight = 8;
+    if (this.healProgressBar) {
+      this.healProgressBar.clear();
+      // Draw progress bar background
+      this.healProgressBar.fillStyle(0x333333, 0.8);
+      this.healProgressBar.fillRect(barX, barY, barWidth, barHeight);
+      // Draw progress bar fill
+      const progress = currentHeal / maxHeal;
+      const progressColor = progress >= 1 ? 0x00ff00 : 0x00aa00;
+      this.healProgressBar.fillStyle(progressColor, 1);
+      this.healProgressBar.fillRect(barX, barY, barWidth * progress, barHeight);
+      // Draw progress bar border
+      this.healProgressBar.lineStyle(2, 0xffffff, 1);
+      this.healProgressBar.strokeRect(barX, barY, barWidth, barHeight);
+    }
+    this.healProgressText?.setText(`Heal Progress: ${currentHeal}/${maxHeal}`);
+  }
+
+  public resetMilestone() {
+    this.lastMilestone = { value: 0 };
+  }
+
   public destroy() {
     // Clean up UI elements
     if (this.leaderboardText) this.leaderboardText.destroy();
@@ -319,5 +374,7 @@ export class GameUI {
     if (this.pauseMenu) this.pauseMenu.destroy();
     if (this.youLineText) this.youLineText.destroy();
     if (this.ultimateHintText) this.ultimateHintText.destroy();
+    if (this.healProgressText) this.healProgressText.destroy();
+    if (this.healProgressBar) this.healProgressBar.destroy();
   }
 }

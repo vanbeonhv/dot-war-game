@@ -97,6 +97,10 @@ export default class GameScene extends Phaser.Scene {
         this.playerManager.getCurrentBotCount()
       );
 
+      // Update heal progress UI
+      const healProgress = this.playerManager.getHealProgress();
+      this.gameUI.updateHealProgress(healProgress.current, healProgress.required);
+
       // Update boss health bar
       const boss = this.playerManager.getPlayers().find((p) => p.data.name === 'BOSS');
       if (boss && this.playerManager.getRespawnTimers()[this.playerManager.getPlayers().indexOf(boss)] <= 0) {
@@ -261,6 +265,9 @@ export default class GameScene extends Phaser.Scene {
   private resetGame() {
     // Reset all game state
     this.gameState.reset();
+
+    // Reset milestone tracking
+    this.gameUI.resetMilestone();
 
     // Clean up all managers
     this.gameInput.destroy();

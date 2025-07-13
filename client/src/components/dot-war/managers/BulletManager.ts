@@ -175,6 +175,9 @@ export class BulletManager {
             } else {
               // Bot và Boss - không tạo respawn text
               respawnTexts[j] = null;
+
+              // Gọi onBotKilled ngay khi bot bị giết
+              this.playerManager.onBotKilled();
             }
 
             // Handle main player death in survival mode

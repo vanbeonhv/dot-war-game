@@ -143,9 +143,10 @@
 - ⬜ Environmental hazards
 
 #### 6.6 UI/UX Polish
-- ⬜ HUD hiển thị thời gian sống sót, wave hiện tại
+- ✅ HUD hiển thị thời gian sống sót, wave hiện tại
 - ⬜ HUD hiển thị power-up đang active và thời gian còn lại
-- ⬜ Màn hình hướng dẫn phím điều khiển (WASD, Q để ulti)
+- ✅ Màn hình hướng dẫn phím điều khiển (WASD, Q để ulti)
+- ✅ **Màn hình hướng dẫn lần đầu truy cập** - Hiển thị cho người chơi mới, lưu trạng thái vào sessionStorage
 - ⬜ Hiệu ứng âm thanh và visual feedback
 - ⬜ Toggle sound effects
 - ⬜ Tùy chỉnh tốc độ di chuyển, tốc độ đạn
@@ -221,6 +222,12 @@
 ---
 
 ### 🎯 **Cải tiến gần đây (Latest Updates)**
+
+#### **Màn hình hướng dẫn lần đầu truy cập**
+- ✅ **FirstTimeGuide component**: Màn hình hướng dẫn đẹp mắt cho người chơi mới
+- ✅ **SessionStorage**: Lưu trạng thái đã xem hướng dẫn trong phiên làm việc
+- ✅ **Auto-show**: Tự động hiển thị hướng dẫn cho lần đầu truy cập
+- ✅ **One-time per session**: Chỉ hiển thị một lần trong mỗi phiên làm việc
 
 #### **Hệ thống bắn đạn thông minh**
 - **Bot thường**: Từ wave 5 trở đi có 4 pattern bắn đạn khác nhau thay vì chỉ bắn thẳng

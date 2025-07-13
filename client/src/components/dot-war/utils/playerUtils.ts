@@ -1,5 +1,6 @@
 import { PLAYER_RADIUS } from '../constants/constants';
 import type { Player } from '../entities/Player';
+import { createScoreMilestoneEffect } from './effects';
 
 export function respawnPlayer(
   players: Player[],
@@ -56,20 +57,50 @@ export function updateLeaderboard(
   players: Player[],
   leaderboardText: Phaser.GameObjects.Text,
   youLineText: Phaser.GameObjects.Text | undefined,
-  setYouLineText: (t?: Phaser.GameObjects.Text) => void
+  setYouLineText: (t?: Phaser.GameObjects.Text) => void,
+  add?: Phaser.GameObjects.GameObjectFactory,
+  tweens?: Phaser.Tweens.TweenManager,
+  lastMilestone?: { value: number },
+  setLastMilestone?: (milestone: { value: number }) => void
 ) {
-  // Sắp xếp theo điểm giảm dần
-  const sorted = [...players].sort((a, b) => b.getScore() - a.getScore());
-  const maxNameLen = Math.max(...sorted.map((p) => (p.data.isMain ? 'You ★' : p.data.name || p.data.id).length), 8);
-  const maxScoreLen = Math.max(...sorted.map((p) => p.getScore().toString().length), 2);
-  const lines = sorted.map((p, idx) => {
-    let name = p.data.isMain ? 'You ★' : p.data.name || p.data.id;
-    let score = p.getScore().toString();
-    name = name.padEnd(maxNameLen, ' ');
-    score = score.padStart(maxScoreLen, ' ');
-    return `${(idx + 1).toString().padEnd(2)}. ${name} : ${score}`;
-  });
-  leaderboardText.setText(['Leaderboard', ...lines].join('\n'));
+  // Chỉ lấy điểm của người chơi chính
+  const mainPlayer = players.find((p) => p.data.isMain);
+  if (mainPlayer) {
+    const score = mainPlayer.getScore();
+    const scoreText = score.toString().padStart(4, '0'); // Thêm leading zeros
+    leaderboardText.setText(`🎯 Score: ${scoreText}`);
+
+    // Kiểm tra và tạo hiệu ứng cho mức điểm mới
+    if (add && tweens && lastMilestone && setLastMilestone) {
+      const milestones = [100, 250, 500, 750, 1000, 1500, 2000, 3000, 5000];
+      const currentMilestone = milestones.find((m) => score >= m && lastMilestone.value < m);
+
+      if (currentMilestone) {
+        // Tạo hiệu ứng tại vị trí của leaderboard
+        createScoreMilestoneEffect(
+          add,
+          tweens,
+          leaderboardText.x + leaderboardText.width / 2,
+          leaderboardText.y - 30,
+          currentMilestone
+        );
+
+        // Cập nhật milestone cuối cùng
+        setLastMilestone({ value: currentMilestone });
+      }
+    }
+
+    // Thay đổi màu sắc dựa trên điểm số
+    if (score >= 1000) {
+      leaderboardText.setColor('#FFD700'); // Vàng cho điểm cao
+    } else if (score >= 500) {
+      leaderboardText.setColor('#FF6B6B'); // Đỏ cam cho điểm trung bình
+    } else if (score >= 100) {
+      leaderboardText.setColor('#4ECDC4'); // Xanh lá cho điểm thấp
+    } else {
+      leaderboardText.setColor('#FFFFFF'); // Trắng cho điểm thấp
+    }
+  }
   // Xoá text object youLineText nếu có
   if (youLineText) {
     youLineText.destroy();
@@ -121,14 +152,6 @@ export function handlePlayerHit(player: Player, respawnTimers: any[], playerInde
       respawnTimers[playerIndex] = 3000;
       player.setVisible(false);
       player.setAlpha(0.5);
-
-      // Chỉ hiển thị respawn text cho player chính
-      if (playerIndex === 0) {
-        // Player chính - hiển thị respawn text
-        // Logic này sẽ được xử lý trong BulletManager
-      } else {
-        // Bot - không hiển thị respawn text, sẽ bị xóa hoàn toàn
-      }
     }
   }
   return wasDamaged;
