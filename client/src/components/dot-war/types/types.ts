@@ -10,6 +10,7 @@ export interface PlayerData {
   _moveDir?: { x: number; y: number };
   energy?: number;
   maxEnergy?: number;
+  maxHp?: number;
   // Power-up related properties
   speed?: number;
   fireRate?: number;
@@ -50,4 +51,4 @@ export interface PowerUpData {
   duration?: number; // thời gian hiệu lực (giây)
   value?: number; // giá trị (damage, speed boost, etc.)
   spawnTime: number; // thời điểm spawn (để tính auto destroy)
-} 
+}

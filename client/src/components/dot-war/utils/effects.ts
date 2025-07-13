@@ -1,4 +1,4 @@
-import { PLAYER_RADIUS } from '../constants';
+import { PLAYER_RADIUS } from '../constants/constants';
 
 export function createHitEffect(
   add: Phaser.GameObjects.GameObjectFactory,

@@ -1,6 +1,6 @@
-import Phaser from 'phaser';
-import { PowerUp } from './PowerUp';
-import type { PowerUpData, PowerUpType } from './types';
+import type Phaser from 'phaser';
+import { PowerUp } from '../entities/PowerUp';
+import type { PowerUpData, PowerUpType } from '../types/types';
 
 export class PowerUpManager {
   private scene: Phaser.Scene;
@@ -106,7 +106,7 @@ export class PowerUpManager {
         ease: 'Power2',
         onComplete: () => {
           particle.destroy();
-        }
+        },
       });
     }
   }
@@ -118,7 +118,7 @@ export class PowerUpManager {
       speed: { color: 0x00cfff },
       rapid: { color: 0xff6600 },
       shield: { color: 0x00ff00 },
-      damage: { color: 0xff0066 }
+      damage: { color: 0xff0066 },
     };
     return configs[type];
   }

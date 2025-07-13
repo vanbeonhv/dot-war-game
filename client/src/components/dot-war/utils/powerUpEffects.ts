@@ -1,6 +1,6 @@
-import { PLAYER_RADIUS } from '../constants';
-import type { Player } from '../Player';
-import type { PowerUpData } from '../types';
+import { PLAYER_RADIUS } from '../constants/constants';
+import type { Player } from '../entities/Player';
+import type { PowerUpData } from '../types/types';
 
 export function applyPowerUpEffect(
   mainPlayer: Player,
@@ -16,8 +16,8 @@ export function applyPowerUpEffect(
 ) {
   switch (powerUpData.type) {
     case 'health':
-      if (mainPlayer.data.hp < 3) {
-        mainPlayer.data.hp = Math.min(mainPlayer.data.hp + 1, 3);
+      if (mainPlayer.data.hp < (mainPlayer.data.maxHp ?? 5)) {
+        mainPlayer.data.hp = Math.min(mainPlayer.data.hp + 1, mainPlayer.data.maxHp ?? 5);
         mainPlayer.drawHealthBar();
         console.log('Health Pack collected: +1 HP');
       }

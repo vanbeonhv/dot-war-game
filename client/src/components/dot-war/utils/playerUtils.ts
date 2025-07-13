@@ -1,5 +1,5 @@
-import { PLAYER_RADIUS } from '../constants';
-import type { Player } from '../Player';
+import { PLAYER_RADIUS } from '../constants/constants';
+import type { Player } from '../entities/Player';
 
 export function respawnPlayer(
   players: Player[],
@@ -14,7 +14,8 @@ export function respawnPlayer(
   player.data.x = newPos.x;
   player.data.y = newPos.y;
   player.setPosition(newPos.x, newPos.y);
-  player.data.hp = 3;
+  player.data.hp = player.data.isMain ? 5 : 3;
+  player.data.maxHp = player.data.isMain ? 5 : 3;
   player.setAlpha(0);
   tweens.add({
     targets: [player.sprite, player.gun, player.nameText, player.healthBar],
@@ -120,6 +121,14 @@ export function handlePlayerHit(player: Player, respawnTimers: any[], playerInde
       respawnTimers[playerIndex] = 3000;
       player.setVisible(false);
       player.setAlpha(0.5);
+
+      // Chỉ hiển thị respawn text cho player chính
+      if (playerIndex === 0) {
+        // Player chính - hiển thị respawn text
+        // Logic này sẽ được xử lý trong BulletManager
+      } else {
+        // Bot - không hiển thị respawn text, sẽ bị xóa hoàn toàn
+      }
     }
   }
   return wasDamaged;

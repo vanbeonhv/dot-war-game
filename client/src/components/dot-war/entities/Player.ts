@@ -1,5 +1,5 @@
-import Phaser from "phaser";
-import type { PlayerData } from "./types";
+import Phaser from 'phaser';
+import type { PlayerData } from '../types/types';
 
 export class Player {
   public data: PlayerData;
@@ -7,16 +7,16 @@ export class Player {
   public nameText: Phaser.GameObjects.Text;
   public healthBar: Phaser.GameObjects.Graphics;
   public gun: Phaser.GameObjects.Rectangle;
-  private scene: Phaser.Scene;
-  private glowCircle?: Phaser.GameObjects.Arc;
+  protected scene: Phaser.Scene;
+  protected glowCircle?: Phaser.GameObjects.Arc;
   private ultimateText?: Phaser.GameObjects.Text;
 
   constructor(scene: Phaser.Scene, data: PlayerData) {
     this.scene = scene;
-    this.data = { 
-      ...data, 
-      score: data.score ?? 0, 
-      energy: data.energy ?? 0, 
+    this.data = {
+      ...data,
+      score: data.score ?? 0,
+      energy: data.energy ?? 0,
       maxEnergy: data.maxEnergy ?? 5,
       // Khởi tạo power-up properties
       speed: data.speed ?? 200,
@@ -26,14 +26,15 @@ export class Player {
       rapidFireActive: false,
       shieldActive: false,
       doubleDamageActive: false,
-      shieldHits: 0
+      shieldHits: 0,
+      maxHp: data.maxHp ?? (data.isMain ? 5 : 3),
     };
     this.sprite = scene.add.circle(data.x, data.y, 20, Phaser.Display.Color.HexStringToColor(data.color).color);
     this.gun = scene.add.rectangle(data.x, data.y, 24, 6, 0xffffff, 1);
     this.gun.setOrigin(-0.1, 0.5); // Đầu mũi súng nhô ra ngoài
-    this.nameText = scene.add.text(data.x - 18, data.y - 35, data.name || (data.isMain ? "You" : data.id), {
-      font: "16px Arial",
-      color: "#fff",
+    this.nameText = scene.add.text(data.x - 18, data.y - 35, data.name || (data.isMain ? 'You' : data.id), {
+      font: '16px Arial',
+      color: '#fff',
     });
     this.healthBar = scene.add.graphics();
     this.drawHealthBar();
@@ -70,8 +71,12 @@ export class Player {
     this.nameText.setVisible(visible);
     this.healthBar.setVisible(visible);
     this.drawHealthBar();
-    if (this.glowCircle) this.glowCircle.setVisible(visible && (this.data.isMain && (this.data.energy ?? 0) >= (this.data.maxEnergy ?? 5)));
-    if (this.ultimateText) this.ultimateText.setVisible(visible && (this.data.isMain && (this.data.energy ?? 0) >= (this.data.maxEnergy ?? 5)));
+    if (this.glowCircle)
+      this.glowCircle.setVisible(visible && this.data.isMain && (this.data.energy ?? 0) >= (this.data.maxEnergy ?? 5));
+    if (this.ultimateText)
+      this.ultimateText.setVisible(
+        visible && this.data.isMain && (this.data.energy ?? 0) >= (this.data.maxEnergy ?? 5)
+      );
   }
 
   setAlpha(alpha: number) {
@@ -100,7 +105,7 @@ export class Player {
     this.healthBar.fillStyle(0x333333, 1);
     this.healthBar.fillRect(x, y, barWidth, barHeight);
     // HP
-    const hpPercent = Math.max(0, this.data.hp) / 3;
+    const hpPercent = Math.max(0, this.data.hp) / (this.data.maxHp ?? 5);
     this.healthBar.fillStyle(0x00ff00, 1);
     this.healthBar.fillRect(x, y, barWidth * hpPercent, barHeight);
     // Border máu
@@ -133,19 +138,21 @@ export class Player {
           alpha: 0.1,
           duration: 500,
           yoyo: true,
-          repeat: -1
+          repeat: -1,
         });
       }
       this.glowCircle.setPosition(this.data.x, this.data.y);
       this.glowCircle.setVisible(true);
       // Popup
       if (!this.ultimateText) {
-        this.ultimateText = this.scene.add.text(this.data.x, this.data.y - 60, 'Ultimate Ready!', {
-          font: 'bold 16px Arial',
-          color: '#ffe066',
-          stroke: '#000',
-          strokeThickness: 3,
-        }).setOrigin(0.5);
+        this.ultimateText = this.scene.add
+          .text(this.data.x, this.data.y - 60, 'Ultimate Ready!', {
+            font: 'bold 16px Arial',
+            color: '#ffe066',
+            stroke: '#000',
+            strokeThickness: 3,
+          })
+          .setOrigin(0.5);
         this.ultimateText.setDepth(20);
       }
       this.ultimateText.setPosition(this.data.x, this.data.y - 60);
@@ -177,7 +184,7 @@ export class Player {
     if (this.data.shieldActive && this.data.shieldHits && this.data.shieldHits > 0) {
       this.data.shieldHits--;
       console.log(`Shield absorbed damage! ${this.data.shieldHits} hits remaining`);
-      
+
       // Hiệu ứng shield hit
       const originalColor = Phaser.Display.Color.HexStringToColor(this.data.color).color;
       this.sprite.setFillStyle(0x70a1ff);
@@ -192,9 +199,9 @@ export class Player {
           this.sprite.setFillStyle(originalColor);
           this.sprite.setAlpha(1);
           this.sprite.setScale(1, 1);
-        }
+        },
       });
-      
+
       // Nếu hết shield hits, tắt shield
       if (this.data.shieldHits <= 0) {
         this.data.shieldActive = false;
@@ -204,10 +211,10 @@ export class Player {
         }
         console.log('Shield broken!');
       }
-      
+
       return false; // Không bị mất máu
     }
-    
+
     // Bình thường, giảm máu
     this.data.hp = Math.max(0, this.data.hp - 1);
     this.drawHealthBar();
@@ -220,4 +227,4 @@ export class Player {
       this.data.shieldVisual.setPosition(this.data.x, this.data.y);
     }
   }
-} 
+}
