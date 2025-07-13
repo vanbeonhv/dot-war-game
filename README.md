@@ -1,4 +1,4 @@
-# 📊 Progress - Dot War Game 2D (Survival Mode)
+# ![game-play](client/public/favicon.svg) Progress - Dot War Game 2D (Survival Mode)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/vanbeonhv/dot-war-game?utm_source=oss&utm_medium=github&utm_campaign=vanbeonhv%2Fdot-war-game&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 ## 🎮 Demo
 
