@@ -220,17 +220,111 @@ export class BulletManager {
     if (distance > 0) {
       const normalizedDx = dx / distance;
       const normalizedDy = dy / distance;
+
+      // Lấy current wave từ PlayerManager
+      const currentWave = this.playerManager.getCurrentWave();
+
+      // Chỉ áp dụng pattern mới từ wave 5 trở đi
+      if (currentWave >= 5) {
+        // Chọn pattern bắn ngẫu nhiên
+        const pattern = Math.floor(Math.random() * 4); // 0-3: 4 pattern khác nhau
+
+        switch (pattern) {
+          case 0: // Pattern 1: Bắn thẳng với độ lệch nhỏ
+            this.shootStraightWithSpread(bot, normalizedDx, normalizedDy, Math.PI / 8); // ±11 độ
+            break;
+          case 1: // Pattern 2: Bắn 3 viên spread
+            this.shootSpreadShot(bot, normalizedDx, normalizedDy, 3, Math.PI / 6); // 3 viên ±15 độ
+            break;
+          case 2: // Pattern 3: Bắn với độ lệch lớn
+            this.shootStraightWithSpread(bot, normalizedDx, normalizedDy, Math.PI / 4); // ±22 độ
+            break;
+          case 3: // Pattern 4: Bắn 2 viên song song
+            this.shootParallelShot(bot, normalizedDx, normalizedDy);
+            break;
+        }
+      } else {
+        // Wave 1-4: Bắn đơn giản với độ lệch nhỏ
+        const baseAngle = Math.atan2(normalizedDy, normalizedDx);
+        const randomSpread = ((Math.random() - 0.5) * Math.PI) / 12; // ±7.5 độ (nhỏ hơn)
+        const finalAngle = baseAngle + randomSpread;
+
+        const finalDx = Math.cos(finalAngle);
+        const finalDy = Math.sin(finalAngle);
+
+        const bulletData = {
+          x: bot.data.x + finalDx * 20,
+          y: bot.data.y + finalDy * 20,
+          dx: finalDx * BULLET_SPEED,
+          dy: finalDy * BULLET_SPEED,
+          life: 3000,
+          ownerId: bot.data.id,
+        };
+        const bullet = new Bullet(this.scene, bulletData);
+        this.bullets.push(bullet);
+      }
+    }
+  }
+
+  private shootStraightWithSpread(bot: any, dx: number, dy: number, spread: number) {
+    const baseAngle = Math.atan2(dy, dx);
+    const randomSpread = (Math.random() - 0.5) * spread;
+    const finalAngle = baseAngle + randomSpread;
+
+    const finalDx = Math.cos(finalAngle);
+    const finalDy = Math.sin(finalAngle);
+
+    const bulletData = {
+      x: bot.data.x + finalDx * 20,
+      y: bot.data.y + finalDy * 20,
+      dx: finalDx * BULLET_SPEED,
+      dy: finalDy * BULLET_SPEED,
+      life: 3000,
+      ownerId: bot.data.id,
+    };
+    const bullet = new Bullet(this.scene, bulletData);
+    this.bullets.push(bullet);
+  }
+
+  private shootSpreadShot(bot: any, dx: number, dy: number, numBullets: number, spread: number) {
+    const baseAngle = Math.atan2(dy, dx);
+
+    for (let i = 0; i < numBullets; i++) {
+      const t = i / (numBullets - 1);
+      const angle = baseAngle - spread / 2 + t * spread;
+
       const bulletData = {
-        x: bot.data.x + normalizedDx * 20, // PLAYER_RADIUS
-        y: bot.data.y + normalizedDy * 20, // PLAYER_RADIUS
-        dx: normalizedDx * BULLET_SPEED,
-        dy: normalizedDy * BULLET_SPEED,
+        x: bot.data.x + Math.cos(angle) * 20,
+        y: bot.data.y + Math.sin(angle) * 20,
+        dx: Math.cos(angle) * BULLET_SPEED,
+        dy: Math.sin(angle) * BULLET_SPEED,
         life: 3000,
         ownerId: bot.data.id,
       };
       const bullet = new Bullet(this.scene, bulletData);
       this.bullets.push(bullet);
     }
+  }
+
+  private shootParallelShot(bot: any, dx: number, dy: number) {
+    const baseAngle = Math.atan2(dy, dx);
+    const offset = Math.PI / 12; // 15 độ
+
+    // Bắn 2 viên song song
+    const angles = [baseAngle - offset, baseAngle + offset];
+
+    angles.forEach((angle) => {
+      const bulletData = {
+        x: bot.data.x + Math.cos(angle) * 20,
+        y: bot.data.y + Math.sin(angle) * 20,
+        dx: Math.cos(angle) * BULLET_SPEED,
+        dy: Math.sin(angle) * BULLET_SPEED,
+        life: 3000,
+        ownerId: bot.data.id,
+      };
+      const bullet = new Bullet(this.scene, bulletData);
+      this.bullets.push(bullet);
+    });
   }
 
   public getBullets(): Bullet[] {

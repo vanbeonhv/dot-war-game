@@ -12,6 +12,7 @@ export class GameUI {
   private bossHealthText!: Phaser.GameObjects.Text;
   private pauseMenu!: Phaser.GameObjects.Container;
   private youLineText?: Phaser.GameObjects.Text;
+  private ultimateHintText?: Phaser.GameObjects.Text;
   private highScore: number = 0;
   private isBossActive: boolean = false;
 
@@ -27,6 +28,7 @@ export class GameUI {
     this.createWaveInfo();
     this.createBossHealthBar();
     this.createPauseMenu();
+    this.createUltimateHint();
   }
 
   private createLeaderboard() {
@@ -90,7 +92,7 @@ export class GameUI {
       })
       .setOrigin(0.5);
     const instructions = this.scene.add
-      .text(0, 0, 'Press ESC to resume\nClick to shoot\nWASD to move', {
+      .text(0, 0, 'Press ESC to resume\nClick to shoot\nWASD to move\nQ or SPACE for Ultimate', {
         font: '24px Arial',
         color: '#ccc',
         align: 'center',
@@ -98,6 +100,17 @@ export class GameUI {
       .setOrigin(0.5);
     this.pauseMenu.add([overlay, title, instructions]);
     this.pauseMenu.setVisible(false);
+  }
+
+  private createUltimateHint() {
+    this.ultimateHintText = this.scene.add.text(20, 550, 'Press Q or SPACE for Ultimate Skill', {
+      font: '16px Arial',
+      color: '#ffe066',
+      fontStyle: 'bold',
+      stroke: '#000',
+      strokeThickness: 2,
+    });
+    this.ultimateHintText.setDepth(100);
   }
 
   public updateSurvivalTimer(survivalTime: number, survivalTarget: number) {
@@ -282,6 +295,19 @@ export class GameUI {
     this.bossHealthText.setText(`BOSS HP: ${bossHP}/${maxHP}`);
   }
 
+  public updateUltimateHint(hasEnoughEnergy: boolean) {
+    if (this.ultimateHintText) {
+      this.ultimateHintText.setVisible(hasEnoughEnergy);
+      if (hasEnoughEnergy) {
+        this.ultimateHintText.setColor('#ffe066');
+        this.ultimateHintText.setText('Press Q or SPACE for Ultimate Skill');
+      } else {
+        this.ultimateHintText.setColor('#666666');
+        this.ultimateHintText.setText('Ultimate Skill: Collect energy orbs');
+      }
+    }
+  }
+
   public destroy() {
     // Clean up UI elements
     if (this.leaderboardText) this.leaderboardText.destroy();
@@ -292,5 +318,6 @@ export class GameUI {
     if (this.bossHealthText) this.bossHealthText.destroy();
     if (this.pauseMenu) this.pauseMenu.destroy();
     if (this.youLineText) this.youLineText.destroy();
+    if (this.ultimateHintText) this.ultimateHintText.destroy();
   }
 }

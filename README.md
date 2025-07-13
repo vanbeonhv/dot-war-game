@@ -4,10 +4,9 @@
 
 ![game-play](assets/game-play.png)
 
-https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65
+[https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65](https://github.com/user-attachments/assets/338603ec-8a23-4259-9efc-178f582ea6e7)
 
 ---
-
 ## ✅ Checklist phát triển
 
 ### 1. Khởi tạo & Cơ bản
@@ -102,8 +101,25 @@ https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65
 - ✅ Bot spawn nhiều hơn theo wave (3, 5, 7, ...)
 - ✅ Bot di chuyển nhanh hơn ở wave cao
 - ✅ Bot bắn nhanh hơn và chính xác hơn
+- ✅ **Bot có pattern bắn đạn thông minh từ wave 5 trở đi:**
+  - Pattern 1: Bắn thẳng với độ lệch nhỏ (±11 độ)
+  - Pattern 2: Bắn 3 viên spread (±15 độ)
+  - Pattern 3: Bắn với độ lệch lớn (±22 độ)
+  - Pattern 4: Bắn 2 viên song song
+- ✅ **Boss có 5 pattern bắn đạn đa dạng từ wave 5 trở đi:**
+  - Pattern 1: Bắn thẳng với độ lệch lớn (±30 độ)
+  - Pattern 2: Bắn 4 viên spread (±45 độ)
+  - Pattern 3: Bắn 3 viên song song
+  - Pattern 4: Bắn 2 viên với hướng hoàn toàn ngẫu nhiên
+  - Pattern 5: Bắn 2 viên với tốc độ khác nhau (chậm và nhanh)
+- ✅ **Ultimate của Boss được cải thiện:**
+  - Tăng spread từ ±60 độ lên ±90 độ
+  - Tăng số đạn từ 8 lên 10 viên
+  - Thêm độ lệch ngẫu nhiên ±15 độ cho từng đạn
+- ✅ **Wave 1-4: Bot và Boss bắn đơn giản, dễ né hơn**
+- ✅ **Wave 5+: Bot và Boss có pattern phức tạp, khó né hơn**
 - ⬜ Bot có thể dùng ultimate skill ở wave cao
-- ⬜ Boss bot xuất hiện cuối mỗi 5 wave
+- ✅ Boss bot xuất hiện cuối mỗi 5 wave
 
 #### 6.3 Survival Rewards & Progression
 - ⬜ Combo system: bắn liên tiếp được bonus điểm
@@ -160,6 +176,10 @@ https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65
 - ✅ Ultimate skill cho boss
 - ✅ Hiệu ứng đặc biệt (glow, outline, particle)
 - ✅ Thanh máu boss trên HUD
+- ✅ **AI bắn đạn thông minh với 5 pattern khác nhau từ wave 5 trở đi**
+- ✅ **Ultimate skill được cải thiện với spread rộng hơn và nhiều đạn hơn**
+- ✅ **Wave 1-4: Boss bắn đơn giản với độ lệch nhỏ (±11 độ)**
+- ✅ **Wave 5+: Boss có pattern phức tạp, khó né hơn**
 - ⬜ Phần thưởng khi tiêu diệt boss
 - ✅ Âm thanh/visual effect khi boss xuất hiện/chết
 
@@ -169,40 +189,16 @@ https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65
 - **Tốc độ di chuyển**: Nhanh hơn bot thường ở wave đầu, có thể tăng khi gần chết
 - **Tốc độ bắn**: Bắn liên tục hoặc burst fire
 - **Ultimate**: Có thể dùng ultimate skill (bắn nhiều viên, đạn xuyên, đạn nổ...)
+- **AI bắn đạn thông minh**: 
+  - **Wave 1-4**: Bắn đơn giản với độ lệch nhỏ (±11 độ)
+  - **Wave 5+**: 5 pattern bắn đạn đa dạng (spread, song song, ngẫu nhiên, tốc độ khác nhau)
+- **Ultimate cải thiện**: Spread ±90 độ, 10 viên đạn, độ lệch ngẫu nhiên
 - **Hiệu ứng đặc biệt**: Glow, outline, particle riêng biệt
 - **Tên riêng**: Hiển thị "BOSS" hoặc tên đặc biệt trên đầu
 - **AI**: Đuổi theo player chính, tránh đạn, triệu hồi bot thường ở wave cao
 - **Enrage**: Khi gần chết, tăng tốc hoặc đổi pattern tấn công
 - **Phần thưởng**: Nhiều điểm, nhiều power-up, hồi máu/energy
 - **UI/UX**: Thanh máu boss lớn, hiệu ứng rung màn hình/âm thanh khi boss xuất hiện/chết
-
-#### 7.4 Gợi ý cấu trúc code
-
-**entities/BossBot.ts**
-```ts
-import { Player } from './Player';
-
-export class BossBot extends Player {
-  constructor(scene, config) {
-    super(scene, {
-      ...config,
-      hp: 20, // hoặc tuỳ theo wave
-      color: '#ff2222',
-      isBoss: true,
-      // ...các thuộc tính riêng
-    });
-    // Thêm hiệu ứng, scale sprite, v.v.
-  }
-
-  updateAI(targetPlayer) {
-    // Di chuyển thông minh, tấn công, dùng ultimate, v.v.
-  }
-
-  useUltimate() {
-    // Bắn spread, burst, hoặc đạn đặc biệt
-  }
-}
-```
 
 **managers/PlayerManager.ts**
 - Khi đến boss wave, spawn 1 BossBot thay vì bot thường.
@@ -221,3 +217,24 @@ export class BossBot extends Player {
 - Wave sau sẽ tăng số lượng bot, tốc độ di chuyển và tốc độ bắn của bot cũng tăng dần
 - UI hiển thị số bot còn lại, wave hiện tại, và tiến độ tiêu diệt bot
 - Mục tiêu: sống sót càng lâu, vượt qua càng nhiều wave càng tốt!
+
+---
+
+### 🎯 **Cải tiến gần đây (Latest Updates)**
+
+#### **Hệ thống bắn đạn thông minh**
+- **Bot thường**: Từ wave 5 trở đi có 4 pattern bắn đạn khác nhau thay vì chỉ bắn thẳng
+- **Boss Bot**: Từ wave 5 trở đi có 5 pattern bắn đạn đa dạng và khó né hơn
+- **Ultimate Boss**: Được cải thiện với spread rộng hơn và nhiều đạn hơn
+- **Progressive Difficulty**: Wave 1-4 dễ chơi, wave 5+ tăng độ khó đáng kể
+
+#### **Sửa lỗi hệ thống**
+- ✅ Sửa lỗi wave bị reset về 1 sau wave 5
+- ✅ Sửa lỗi boss ultimate gây crash khi bulletManager null
+- ✅ Đảm bảo wave 1 luôn có bot khi bắt đầu game
+- ✅ Cải thiện logic khởi tạo game và chuyển wave
+
+#### **Cân bằng game**
+- **Wave 1-4**: Bot và boss bắn đơn giản (±7-11 độ lệch), phù hợp cho người mới
+- **Wave 5+**: Pattern phức tạp, độ lệch lớn (±15-45 độ), thách thức cho người chơi có kinh nghiệm
+- **Boss**: Từ wave 5 trở đi trở nên nguy hiểm hơn với pattern đa dạng
