@@ -15,6 +15,7 @@ export class GameUI {
   private ultimateHintText?: Phaser.GameObjects.Text;
   private highScore: number = 0;
   private isBossActive: boolean = false;
+  private lastMilestone: { value: number } = { value: 0 };
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -172,9 +173,20 @@ export class GameUI {
   }
 
   public updateLeaderboard(players: Player[]) {
-    updateLeaderboard(players, this.leaderboardText, this.youLineText, (t) => {
-      this.youLineText = t;
-    });
+    updateLeaderboard(
+      players,
+      this.leaderboardText,
+      this.youLineText,
+      (t) => {
+        this.youLineText = t;
+      },
+      this.scene.add,
+      this.scene.tweens,
+      this.lastMilestone,
+      (milestone) => {
+        this.lastMilestone = milestone;
+      }
+    );
   }
 
   public showPauseMenu() {
@@ -306,6 +318,10 @@ export class GameUI {
         this.ultimateHintText.setText('Ultimate Skill: Collect energy orbs');
       }
     }
+  }
+
+  public resetMilestone() {
+    this.lastMilestone = { value: 0 };
   }
 
   public destroy() {

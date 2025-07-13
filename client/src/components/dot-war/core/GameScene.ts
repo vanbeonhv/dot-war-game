@@ -262,6 +262,9 @@ export default class GameScene extends Phaser.Scene {
     // Reset all game state
     this.gameState.reset();
 
+    // Reset milestone tracking
+    this.gameUI.resetMilestone();
+
     // Clean up all managers
     this.gameInput.destroy();
     this.gameUI.destroy();
