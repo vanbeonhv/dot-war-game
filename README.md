@@ -4,10 +4,9 @@
 
 ![game-play](assets/game-play.png)
 
-https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65
+[https://github.com/user-attachments/assets/a1eefca3-7d09-42c7-bb92-2d2be65f0d65](https://github.com/user-attachments/assets/338603ec-8a23-4259-9efc-178f582ea6e7)
 
 ---
-
 ## ✅ Checklist phát triển
 
 ### 1. Khởi tạo & Cơ bản
