@@ -1,3 +1,4 @@
+export const DOT_WAR_VERSION = 'v1.0.1';
 export const PLAYER_COLORS = ['#e63946', '#457b9d', '#f1faee', '#a8dadc', '#ffbe0b', '#8338ec', '#3a86ff'];
 export const PLAYER_RADIUS = 20;
 export const PLAYER_SPEED = 200;
@@ -17,3 +18,7 @@ export const BOT_SPEED_INCREASE_PER_WAVE = 0.1; // 10% speed increase per wave
 export const BOT_SHOOT_RATE_INCREASE_PER_WAVE = 0.07; // 7% faster shooting per wave
 export const BASE_BOT_SPEED = 0.6; // Base bot speed multiplier
 export const BASE_BOT_SHOOT_INTERVAL = 1500; // Base shoot interval in ms
+
+// Healing System Constants
+export const BOTS_KILLED_FOR_HEAL = 3; // Số bot cần giết để được heal
+export const HEAL_AMOUNT = 1; // Số máu được hồi

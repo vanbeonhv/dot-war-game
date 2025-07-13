@@ -5,6 +5,8 @@ import {
   BOT_INCREASE_PER_WAVE,
   BOT_SHOOT_RATE_INCREASE_PER_WAVE,
   BOT_SPEED_INCREASE_PER_WAVE,
+  BOTS_KILLED_FOR_HEAL,
+  HEAL_AMOUNT,
   INITIAL_BOT_COUNT,
   MAX_BOTS_ON_SCREEN,
   PLAYER_COLORS,
@@ -13,6 +15,7 @@ import {
 } from '../constants/constants';
 import { BossBot } from '../entities/BossBot';
 import { Player } from '../entities/Player';
+import { createHealEffect } from '../utils/effects';
 import type { GameState } from '../utils/GameState';
 import { respawnPlayer } from '../utils/playerUtils';
 import type { GameWorld } from './GameWorld';
@@ -28,6 +31,7 @@ export class PlayerManager {
   private gameState: GameState;
   private currentBotCount: number = 0;
   private botIdCounter: number = 0;
+  private botsKilledThisWave: number = 0; // Số bot đã giết trong wave hiện tại
 
   constructor(scene: Phaser.Scene, gameWorld: GameWorld, gameState: GameState) {
     this.scene = scene;
@@ -154,6 +158,9 @@ export class PlayerManager {
   }
 
   public onWaveStart() {
+    // Reset bot kill counter cho wave mới
+    this.botsKilledThisWave = 0;
+
     // Heal and increase max HP for main player after each wave
     const mainPlayer = this.getMainPlayer();
     if (mainPlayer.data.maxHp == null) mainPlayer.data.maxHp = 5;
@@ -162,6 +169,27 @@ export class PlayerManager {
     mainPlayer.drawHealthBar();
     // Spawn bots cho wave mới
     this.spawnWaveBots();
+  }
+
+  private healMainPlayer() {
+    const mainPlayer = this.getMainPlayer();
+    if (mainPlayer.data.maxHp != null && mainPlayer.data.hp < mainPlayer.data.maxHp) {
+      mainPlayer.data.hp = Math.min(mainPlayer.data.hp + HEAL_AMOUNT, mainPlayer.data.maxHp);
+      mainPlayer.drawHealthBar();
+
+      // Tạo hiệu ứng heal đẹp
+      createHealEffect(this.scene.add, this.scene.tweens, mainPlayer.data.x, mainPlayer.data.y);
+    }
+  }
+
+  public onBotKilled() {
+    this.botsKilledThisWave++;
+
+    // Kiểm tra nếu đã giết đủ số bot để được heal
+    if (this.botsKilledThisWave >= BOTS_KILLED_FOR_HEAL) {
+      this.healMainPlayer();
+      this.botsKilledThisWave = 0; // Reset counter sau khi heal
+    }
   }
 
   public getPlayers(): Player[] {
@@ -284,6 +312,8 @@ export class PlayerManager {
   }
 
   private removeDeadBot(botIndex: number) {
+    // onBotKilled đã được gọi từ BulletManager khi bot bị giết
+
     // Xóa bot chết
     this.players[botIndex].destroy();
     this.players.splice(botIndex, 1);
@@ -326,5 +356,12 @@ export class PlayerManager {
 
   public getCurrentWave(): number {
     return this.gameState.getCurrentWave();
+  }
+
+  public getHealProgress(): { current: number; required: number } {
+    return {
+      current: this.botsKilledThisWave,
+      required: BOTS_KILLED_FOR_HEAL,
+    };
   }
 }
