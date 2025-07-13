@@ -56,10 +56,15 @@ const DotWarGuide: React.FC<DotWarGuideProps> = ({ onBack }) => {
               <div className='mt-auto text-sm text-cyan-300/90'>Nhấn trái để bắn</div>
             </div>
 
-            {/* Space Bar */}
-            <div className='flex flex-col items-center gap-2'>
-              <div className='w-48 h-14 flex items-center justify-center border-2 border-cyan-400 rounded-xl bg-gray-800/90 shadow-lg hover:shadow-cyan-400/20 transition-all duration-200 hover:scale-105'>
-                <span className='text-xl font-bold text-white tracking-wider'>Space</span>
+            {/* Ultimate Skill Keys */}
+            <div className='flex flex-col items-center gap-4'>
+              <div className='flex gap-2'>
+                <div className='w-16 h-16 flex items-center justify-center border-2 border-cyan-400 rounded-xl bg-gray-800/90 shadow-lg hover:shadow-cyan-400/20 transition-all duration-200 hover:scale-105'>
+                  <span className='text-2xl font-bold text-white'>Q</span>
+                </div>
+                <div className='w-48 h-16 flex items-center justify-center border-2 border-cyan-400 rounded-xl bg-gray-800/90 shadow-lg hover:shadow-cyan-400/20 transition-all duration-200 hover:scale-105'>
+                  <span className='text-xl font-bold text-white tracking-wider'>Space</span>
+                </div>
               </div>
               <div className='text-sm text-cyan-300/90'>Nhấn để dùng chiêu cuối</div>
             </div>

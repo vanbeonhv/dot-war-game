@@ -210,6 +210,8 @@ export class BossBot extends Player {
     // Border máu
     this.healthBar.lineStyle(2, 0xffffff, 1);
     this.healthBar.strokeRect(x, y, barWidth, barHeight);
+    // Đảm bảo thanh máu không bị scale theo boss
+    this.healthBar.setScale(1, 1);
   }
 
   override setPosition(x: number, y: number) {

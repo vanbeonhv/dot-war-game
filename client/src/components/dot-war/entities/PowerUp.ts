@@ -1,5 +1,5 @@
 import type Phaser from 'phaser';
-import type { PowerUpData, PowerUpType } from './types';
+import type { PowerUpData, PowerUpType } from '../types/types';
 
 export class PowerUp {
   public data: PowerUpData;

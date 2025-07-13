@@ -115,9 +115,17 @@ export default class GameScene extends Phaser.Scene {
     const pointer = this.input.activePointer;
     this.playerManager.updateGunDirections(pointer);
 
+    // Update ultimate hint based on energy
+    if (this.playerManager.getRespawnTimers()[0] <= 0) {
+      const hasEnoughEnergy =
+        (this.playerManager.getMainPlayer().data.energy ?? 0) >=
+        (this.playerManager.getMainPlayer().data.maxEnergy ?? 5);
+      this.gameUI.updateUltimateHint(hasEnoughEnergy);
+    }
+
     // Handle ultimate ability
     if (
-      this.gameInput.isUltimatePressed() &&
+      (this.gameInput.isUltimatePressed() || this.gameInput.isSpacePressed()) &&
       (this.playerManager.getMainPlayer().data.energy ?? 0) >=
         (this.playerManager.getMainPlayer().data.maxEnergy ?? 5) &&
       this.playerManager.getRespawnTimers()[0] <= 0
