@@ -22,8 +22,8 @@ const Home = () => {
       description: 'A multiplayer dot-based battle game where players compete in real-time combat.',
       route: '/dot-war',
       color: 'from-blue-500 to-purple-600',
-      players: 2
-    }
+      players: 2,
+    },
   ];
 
   const handleGameClick = (game: Game) => {
@@ -43,10 +43,14 @@ const Home = () => {
       {/* Games Grid */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto'>
         {games.map((game) => (
-          <div
+          <button
             key={game.id}
+            type='button'
             onClick={() => handleGameClick(game)}
-            className='group cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl'
+            className='group cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl text-left p-0 bg-transparent border-none'
+            style={{ all: 'unset', display: 'block' }}
+            tabIndex={0}
+            aria-label={`Play ${game.title}`}
           >
             <div className='relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20'>
               {/* Game Card Background */}
@@ -57,7 +61,12 @@ const Home = () => {
               {/* Card Content */}
               <div className='relative p-8 h-full'>
                 {/* Game Icon/Emoji */}
-                <div className='text-4xl mb-4'>{game.id === 'dot-war' ? '🎯' : '🎮'}</div>
+
+                {game.id === 'dot-war' ? (
+                  <img src='/favicon.png' alt='dot-war' />
+                ) : (
+                  <div className='text-4xl mb-4'>'🎮'</div>
+                )}
 
                 {/* Game Title */}
                 <h3 className='text-2xl font-bold text-white mb-3'>{game.title}</h3>
@@ -75,24 +84,29 @@ const Home = () => {
                   </div>
 
                   {/* Play Button */}
-                  <div className='flex items-center space-x-2 text-blue-400 group-hover:text-blue-300 transition-colors'>
+                  <button
+                    type='button'
+                    className='flex items-center space-x-2 text-blue-400 group-hover:text-blue-300 transition-colors focus:outline-none'
+                    aria-label='Play Now'
+                  >
                     <span className='text-sm font-medium'>Play Now</span>
                     <svg
                       className='w-4 h-4 transform group-hover:translate-x-1 transition-transform'
                       fill='none'
                       stroke='currentColor'
                       viewBox='0 0 24 24'
+                      aria-hidden='true'
                     >
                       <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
                     </svg>
-                  </div>
+                  </button>
                 </div>
               </div>
 
               {/* Hover Effect Overlay */}
               <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700' />
             </div>
-          </div>
+          </button>
         ))}
       </div>
 
