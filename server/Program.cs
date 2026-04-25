@@ -2,13 +2,10 @@ using DotWar;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
-    ?? ["http://localhost:5173"];
-
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(p =>
-        p.WithOrigins(allowedOrigins)
+        p.WithOrigins("http://localhost:5173") // 👈 React app origin
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials());

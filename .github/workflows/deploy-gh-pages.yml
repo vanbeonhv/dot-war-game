@@ -47,9 +47,6 @@ jobs:
       - name: 🏗 Build
         run: pnpm run build
         env:
-          # Set VITE_SIGNALR_URL to your deployed backend URL.
-          # Configure this secret in: Settings → Secrets → Actions
-          VITE_SIGNALR_URL: ${{ secrets.VITE_SIGNALR_URL }}
           # When using a custom domain on GitHub Pages, leave this as "/".
           # Without a custom domain use "/<repo-name>/", e.g. "/dot-war-game/".
           VITE_BASE_URL: ${{ vars.VITE_BASE_URL || '/' }}
