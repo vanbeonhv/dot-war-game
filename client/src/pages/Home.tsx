@@ -63,7 +63,7 @@ const Home = () => {
                 {/* Game Icon/Emoji */}
 
                 {game.id === 'dot-war' ? (
-                  <img src='/favicon.png' alt='dot-war' />
+                  <img src={`${import.meta.env.BASE_URL}favicon.png`} alt='dot-war' />
                 ) : (
                   <div className='text-4xl mb-4'>'🎮'</div>
                 )}
