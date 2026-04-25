@@ -1,38 +1,38 @@
-name: deploy-client-to-vps
+# name: deploy-client-to-vps
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - "client/**"
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - "client/**"
 
-defaults:
-  run:
-    working-directory: "client/"
+# defaults:
+#   run:
+#     working-directory: "client/"
     
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: ⬇ Checkout code
-        uses: actions/checkout@v2
+#     steps:
+#       - name: ⬇ Checkout code
+#         uses: actions/checkout@v2
 
-      - name: 🔧 Install pnpm
-        run: npm install -g pnpm
+#       - name: 🔧 Install pnpm
+#         run: npm install -g pnpm
 
-      - name: 📥 Install dependencies
-        run: pnpm install
+#       - name: 📥 Install dependencies
+#         run: pnpm install
 
-      - name: 🏗 Build
-        run: pnpm run build
+#       - name: 🏗 Build
+#         run: pnpm run build
 
-      - name: 📤 Upload dist/ to VPS
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "client/dist/*"
-          target: ${{ secrets.VPS_DEPLOY_PATH }}
+#       - name: 📤 Upload dist/ to VPS
+#         uses: appleboy/scp-action@v0.1.4
+#         with:
+#           host: ${{ secrets.VPS_HOST }}
+#           username: ${{ secrets.VPS_USERNAME }}
+#           key: ${{ secrets.VPS_SSH_KEY }}
+#           source: "client/dist/*"
+#           target: ${{ secrets.VPS_DEPLOY_PATH }}
