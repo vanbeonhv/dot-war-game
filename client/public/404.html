@@ -8,12 +8,14 @@
       // BrowserRouter can handle client-side routing correctly.
       // See: https://github.com/rafgraph/spa-github-pages
       var l = window.location;
+      var isGitHubPages = l.hostname.endsWith('github.io');
+      var pathSegments = isGitHubPages ? 2 : 1; // Repo name is part of path on GitHub Pages only
       l.replace(
         l.protocol +
           '//' +
           l.hostname +
           (l.port ? ':' + l.port : '') +
-          l.pathname.split('/').slice(0, 2).join('/') +
+          l.pathname.split('/').slice(0, pathSegments).join('/') +
           '/?p=/' +
           l.pathname.slice(1).replace(/&/g, '~and~') +
           (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
