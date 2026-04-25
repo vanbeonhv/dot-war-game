@@ -1,0 +1,71 @@
+name: deploy-client-to-github-pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "client/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: "client/"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: client/pnpm-lock.yaml
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗 Build
+        run: pnpm run build
+        env:
+          # Set VITE_SIGNALR_URL to your deployed backend URL.
+          # Configure this secret in: Settings → Secrets → Actions
+          VITE_SIGNALR_URL: ${{ secrets.VITE_SIGNALR_URL }}
+          # When using a custom domain on GitHub Pages, leave this as "/".
+          # Without a custom domain use "/<repo-name>/", e.g. "/dot-war-game/".
+          VITE_BASE_URL: ${{ vars.VITE_BASE_URL || '/' }}
+
+      - name: 📦 Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: client/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

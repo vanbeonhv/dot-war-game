@@ -17,6 +17,29 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- GitHub Pages SPA redirect handler — restores path from ?p= query param set by 404.html -->
+    <script>
+      (function () {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+        var search = location.search;
+        if (search) {
+          var p = new URLSearchParams(search).get('p');
+          if (p) {
+            var path =
+              p.replace(/~and~/g, '&') +
+              (new URLSearchParams(search).get('q')
+                ? '?' + new URLSearchParams(search).get('q').replace(/~and~/g, '&')
+                : '') +
+              location.hash;
+            history.replaceState(null, null, path);
+          }
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
