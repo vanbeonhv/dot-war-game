@@ -27,13 +27,13 @@
         }
         var search = location.search;
         if (search) {
-          var p = new URLSearchParams(search).get('p');
+          var params = new URLSearchParams(search);
+          var p = params.get('p');
           if (p) {
+            var q = params.get('q');
             var path =
               p.replace(/~and~/g, '&') +
-              (new URLSearchParams(search).get('q')
-                ? '?' + new URLSearchParams(search).get('q').replace(/~and~/g, '&')
-                : '') +
+              (q ? '?' + q.replace(/~and~/g, '&') : '') +
               location.hash;
             history.replaceState(null, null, path);
           }
